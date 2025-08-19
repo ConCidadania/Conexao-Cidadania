@@ -140,9 +140,7 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          //bool success = await ctrl.login(email, password);
-                          // Temporary bypass
-                          bool success = true;
+                          bool success = await ctrl.login(email, password);
                           if (success) {
                             _formKey.currentState?.reset();
                             Navigator.pushReplacementNamed(context, 'home');

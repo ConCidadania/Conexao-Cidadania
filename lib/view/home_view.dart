@@ -94,7 +94,7 @@ class _HomeViewState extends State<HomeView> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await userCtrl.logout();
-          Navigator.popUntil(context, ModalRoute.withName('login'));
+          Navigator.pushReplacementNamed(context, 'login');
         },
         backgroundColor: Colors.white,
         child: Icon(Icons.logout, color: primaryColor, size: 30),

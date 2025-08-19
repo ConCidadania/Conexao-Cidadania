@@ -41,49 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBAglKcfXZvEKXLd9-DGsgNOd1qdrTOMaQ',
-    appId: '1:786008933276:web:0a31ac7c696b2c6e33fe59',
-    messagingSenderId: '786008933276',
-    projectId: 'conexao-cidadania-4bec5',
-    authDomain: 'conexao-cidadania-4bec5.firebaseapp.com',
-    storageBucket: 'conexao-cidadania-4bec5.firebasestorage.app',
-    measurementId: 'G-81B0FSG2DN',
+    apiKey: 'AIzaSyA1FoGD_GKawXYULcT8Yz0o_Ra_8WXOxfQ',
+    appId: '1:227314197376:web:a4b60ff48291375b8f5765',
+    messagingSenderId: '227314197376',
+    projectId: 'con-cidadania',
+    authDomain: 'con-cidadania.firebaseapp.com',
+    storageBucket: 'con-cidadania.firebasestorage.app',
+    measurementId: 'G-KZHE7W4L1C',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAbjHsjdvhNJqDl3EtARaY5UeM7-Zc3-8Y',
-    appId: '1:786008933276:android:78083f9288f9c98d33fe59',
-    messagingSenderId: '786008933276',
-    projectId: 'conexao-cidadania-4bec5',
-    storageBucket: 'conexao-cidadania-4bec5.firebasestorage.app',
+    apiKey: 'AIzaSyD57rcWrGfITPz0vgG-ICUt9QHpT5o3JT4',
+    appId: '1:227314197376:android:cec2f2713f1104a18f5765',
+    messagingSenderId: '227314197376',
+    projectId: 'con-cidadania',
+    storageBucket: 'con-cidadania.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCgmm2y7KqlKYKynSqX4XvKWvOo2AVNbEs',
-    appId: '1:786008933276:ios:22a2e9b57afef3e733fe59',
-    messagingSenderId: '786008933276',
-    projectId: 'conexao-cidadania-4bec5',
-    storageBucket: 'conexao-cidadania-4bec5.firebasestorage.app',
-    iosBundleId: 'com.example.appMobile2',
+    apiKey: 'AIzaSyCtnZr2QRH_l5o42-alP6xU5C5oykomYxE',
+    appId: '1:227314197376:ios:dc8cfea233da5d478f5765',
+    messagingSenderId: '227314197376',
+    projectId: 'con-cidadania',
+    storageBucket: 'con-cidadania.firebasestorage.app',
+    iosBundleId: 'com.example.conCidadania',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCgmm2y7KqlKYKynSqX4XvKWvOo2AVNbEs',
-    appId: '1:786008933276:ios:22a2e9b57afef3e733fe59',
-    messagingSenderId: '786008933276',
-    projectId: 'conexao-cidadania-4bec5',
-    storageBucket: 'conexao-cidadania-4bec5.firebasestorage.app',
-    iosBundleId: 'com.example.appMobile2',
+    apiKey: 'AIzaSyCtnZr2QRH_l5o42-alP6xU5C5oykomYxE',
+    appId: '1:227314197376:ios:dc8cfea233da5d478f5765',
+    messagingSenderId: '227314197376',
+    projectId: 'con-cidadania',
+    storageBucket: 'con-cidadania.firebasestorage.app',
+    iosBundleId: 'com.example.conCidadania',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBAglKcfXZvEKXLd9-DGsgNOd1qdrTOMaQ',
-    appId: '1:786008933276:web:edc54afc1e6676d233fe59',
-    messagingSenderId: '786008933276',
-    projectId: 'conexao-cidadania-4bec5',
-    authDomain: 'conexao-cidadania-4bec5.firebaseapp.com',
-    storageBucket: 'conexao-cidadania-4bec5.firebasestorage.app',
-    measurementId: 'G-P1J5F21T3Q',
+    apiKey: 'AIzaSyA1FoGD_GKawXYULcT8Yz0o_Ra_8WXOxfQ',
+    appId: '1:227314197376:web:91b331fac9b2d6b38f5765',
+    messagingSenderId: '227314197376',
+    projectId: 'con-cidadania',
+    authDomain: 'con-cidadania.firebaseapp.com',
+    storageBucket: 'con-cidadania.firebasestorage.app',
+    measurementId: 'G-NNZXKJKDP2',
   );
 
 }

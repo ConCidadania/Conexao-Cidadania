@@ -24,7 +24,7 @@ class _ProfileViewState extends State<ProfileView> {
             icon: Icon(Icons.logout, color: Colors.white),
             onPressed: () async {
               await ctrl.logout();
-              Navigator.pushReplacementNamed(context, 'login');
+              Navigator.pushNamedAndRemoveUntil(context, 'login', ModalRoute.withName('login'));
             },
           ),
         ],

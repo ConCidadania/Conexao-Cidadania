@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "227314197376",
+    "project_id": "con-cidadania",
+    "storage_bucket": "con-cidadania.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:227314197376:android:cec2f2713f1104a18f5765",
+        "android_client_info": {
+          "package_name": "com.example.con_cidadania"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD57rcWrGfITPz0vgG-ICUt9QHpT5o3JT4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
