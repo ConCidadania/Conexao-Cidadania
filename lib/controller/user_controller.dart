@@ -1,341 +1,136 @@
-import 'dart:io';
-import 'package:app_mobile2/model/agendamento_model.dart';
 import 'package:app_mobile2/model/user_model.dart';
+import 'package:app_mobile2/view/components/message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 class UserController extends ChangeNotifier {
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  User? _currentUser;
-  bool _isLoading = false;
-  String? _errorMessage;
+  AppUser? _userRegistrationData;
 
-  User? get currentUser => _currentUser;
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
+  // Métodos para coleta de dados cadastrais
+  void updatePersonalInfo1(String firstName, String lastName, String profession,
+      String? gender, String? civilStatus) {
+    // Inicializa o objeto AppUser se ele for nulo
+    _userRegistrationData ??= AppUser.createEmpty();
+
+    _userRegistrationData?.firstName = firstName;
+    _userRegistrationData?.lastName = lastName;
+    _userRegistrationData?.profession = profession;
+    _userRegistrationData?.gender = gender;
+    _userRegistrationData?.civilStatus = civilStatus;
+  }
+
+  void updatePersonalInfo2(String dateOfBirth, String rg, String cpf,
+      String nationality, String naturality) {
+    _userRegistrationData?.dateOfBirth = dateOfBirth;
+    _userRegistrationData?.rg = rg;
+    _userRegistrationData?.cpf = cpf;
+    _userRegistrationData?.nationality = nationality;
+    _userRegistrationData?.naturality = naturality;
+  }
+
+  void updateAddressInfo(
+      String street,
+      String number,
+      String? complement,
+      String neighborhood,
+      String city,
+      String state,
+      String country,
+      String postalCode) {
+    _userRegistrationData?.street = street;
+    _userRegistrationData?.number = number;
+    _userRegistrationData?.complement = complement;
+    _userRegistrationData?.neighborhood = neighborhood;
+    _userRegistrationData?.city = city;
+    _userRegistrationData?.state = state;
+    _userRegistrationData?.country = country;
+    _userRegistrationData?.postalCode = postalCode;
+  }
 
   // Método para registrar um novo usuário
-  Future<bool> registerUser(
-      String name, String email, String phoneNumber, String password) async {
-    try {
-      _isLoading = true;
-      _errorMessage = null;
-      notifyListeners();
-
-      // Criar usuário no Firebase Authentication
-      auth.UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      // Criar documento do usuário no Firestore
-      Timestamp now = Timestamp.now();
-      User newUser = User(
-        uid: userCredential.user!.uid,
-        name: name,
-        email: email,
-        phoneNumber: phoneNumber,
-        createdAt: now,
-        updatedAt: now,
-      );
-
-      await _firestore
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .set(newUser.toFirestore());
-
-      _currentUser = newUser;
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _isLoading = false;
-      _errorMessage = _handleAuthError(e);
-      notifyListeners();
-      return false;
-    }
+  void registerUser(context, email, password, phoneNumber) {
+    _auth
+        .createUserWithEmailAndPassword(email: email, password: password)
+        .then((result) {
+      _firestore.collection('users').add({
+        'uid': result.user!.uid.toString(),
+        'type': _userRegistrationData!.type.toString(),
+        'email': email,
+        'phoneNumber': phoneNumber,
+        'firstName': _userRegistrationData!.firstName,
+        'lastName': _userRegistrationData!.lastName,
+        'profession': _userRegistrationData!.profession,
+        'gender': _userRegistrationData!.gender,
+        'civilStatus': _userRegistrationData!.civilStatus,
+        'dateOfBirth': _userRegistrationData!.dateOfBirth,
+        'rg': _userRegistrationData!.rg,
+        'cpf': _userRegistrationData!.cpf,
+        'nationality': _userRegistrationData!.nationality,
+        'naturality': _userRegistrationData!.naturality,
+        'street': _userRegistrationData!.street,
+        'number': _userRegistrationData!.number,
+        'complement': _userRegistrationData!.complement,
+        'neighborhood': _userRegistrationData!.neighborhood,
+        'city': _userRegistrationData!.city,
+        'state': _userRegistrationData!.state,
+        'country': _userRegistrationData!.country,
+        'postalCode': _userRegistrationData!.postalCode,
+        'createdAt': Timestamp.now(),
+        'updatedAt': Timestamp.now(),
+      });
+      showMessage(context, 'Usuário criado com sucesso');
+      Navigator.pushReplacementNamed(context, 'login');
+    }).catchError((e) {
+      showMessage(context, _handleAuthError(e));
+    });
   }
 
   // Método para fazer login
-  Future<bool> login(String email, String password) async {
-    try {
-      _isLoading = true;
-      _errorMessage = null;
-      notifyListeners();
-
-      // Autenticar usuário no Firebase Authentication
-      auth.UserCredential userCredential =
-          await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      // Buscar dados do usuário no Firestore
-      DocumentSnapshot userDoc = await _firestore
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .get();
-
-      if (userDoc.exists) {
-        _currentUser = User.fromFirestore(userDoc);
-      } else {
-        throw Exception('Usuário não encontrado no banco de dados');
-      }
-
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _isLoading = false;
-      _errorMessage = _handleAuthError(e);
-      notifyListeners();
-      return false;
-    }
+  void login(context, String email, String password) {
+    _auth
+        .signInWithEmailAndPassword(email: email, password: password)
+        .then((result) async {
+      showMessage(context, "Usuário autenticado com sucesso!");
+      Navigator.pushReplacementNamed(context, 'home');
+    }).catchError((e) {
+      showMessage(context, _handleAuthError(e));
+    });
   }
 
   // Método para recuperar senha
-  Future<bool> resetPassword(String email) async {
-    try {
-      _isLoading = true;
-      _errorMessage = null;
-      notifyListeners();
-
-      await _auth.sendPasswordResetEmail(email: email);
-
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _isLoading = false;
-      _errorMessage = _handleAuthError(e);
-      notifyListeners();
-      return false;
-    }
+  void resetPassword(context, String email) {
+    _auth.sendPasswordResetEmail(email: email).then((result) {
+      showMessage(context, "Um email de verificação foi enviado para $email");
+    }).catchError((e) {
+      showMessage(context, _handleAuthError(e));
+    });
   }
 
   // Método para fazer logout
-  Future<void> logout() async {
-    await _auth.signOut();
-    _currentUser = null;
-    notifyListeners();
+  void logout() {
+    _auth.signOut();
   }
 
-  // Método para verificar se o usuário está logado
-  Future<bool> checkUserLoggedIn() async {
-    auth.User? firebaseUser = _auth.currentUser;
-    if (firebaseUser != null) {
-      try {
-        DocumentSnapshot userDoc =
-            await _firestore.collection('users').doc(firebaseUser.uid).get();
-        if (userDoc.exists) {
-          _currentUser = User.fromFirestore(userDoc);
-          notifyListeners();
-          return true;
-        }
-      } catch (e) {
-        debugPrint('Erro ao buscar dados do usuário: $e');
-      }
-    }
-    return false;
+  String getCurrentUserId() {
+    final user = _auth.currentUser;
+    return user!.uid;
   }
 
-  // Método para buscar agendamentos do usuário
-  Future<List<Appointment>> fetchUserAppointments() async {
-    if (_currentUser == null) {
-      throw Exception('Usuário não está logado');
-    }
+  Future<String> getCurrentUserName() async {
+    var userName = '';
+    await _firestore
+        .collection('users')
+        .where('uid', isEqualTo: getCurrentUserId())
+        .get()
+        .then((result) {
+      userName = result.docs[0].data()['firstName'] ?? '';
+    });
 
-    try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection('appointments')
-          .where('user_uid', isEqualTo: _currentUser!.uid)
-          .orderBy('created_at', descending: true)
-          .get();
-
-      List<Appointment> appointments = [];
-      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-        Appointment appointment = Appointment.fromFirestore(doc);
-        appointments.add(appointment);
-      }
-
-      return appointments;
-    } catch (e) {
-      debugPrint('Erro ao buscar agendamentos: $e');
-      throw Exception('Erro ao buscar agendamentos: $e');
-    }
-  }
-
-  // Método para criar um novo agendamento
-  Future<bool> createAppointment({
-    required String serviceId,
-    required String serviceName,
-    required String professionalId,
-    required String professionalName,
-    required String date,
-    required String time,
-    String? document1Url,
-    String? document2Url,
-  }) async {
-    if (_currentUser == null) return false;
-
-    try {
-      Timestamp now = Timestamp.now();
-
-      Map<String, dynamic> appointmentData = {
-        'userId': _currentUser!.uid,
-        'user_uid': _currentUser!.uid,
-        'serviceId': serviceId,
-        'service_id': serviceId,
-        'serviceName': serviceName,
-        'service_name': serviceName,
-        'professionalId': professionalId,
-        'professional_id': professionalId,
-        'professionalName': professionalName,
-        'professional_name': professionalName,
-        'date': date,
-        'appointment_date': date,
-        'time': time,
-        'appointment_time': time,
-        'status': 'agendado',
-        'document1Url': document1Url,
-        'document_1_url': document1Url,
-        'document2Url': document2Url,
-        'document_2_url': document2Url,
-        'createdAt': now,
-        'created_at': now,
-        'updatedAt': now,
-        'updated_at': now,
-      };
-
-      await _firestore.collection('appointments').add(appointmentData);
-      return true;
-    } catch (e) {
-      debugPrint('Erro ao criar agendamento: $e');
-      return false;
-    }
-  }
-
-  // Método para atualizar data e hora de um agendamento
-  Future<bool> updateAppointmentDateTime(
-      String appointmentId, String newDate, String newTime) async {
-    try {
-      Timestamp now = Timestamp.now();
-      await _firestore.collection('appointments').doc(appointmentId).update({
-        'date': newDate,
-        'appointment_date': newDate,
-        'time': newTime,
-        'appointment_time': newTime,
-        'updatedAt': now,
-        'updated_at': now,
-      });
-      return true;
-    } catch (e) {
-      debugPrint('Erro ao atualizar agendamento: $e');
-      return false;
-    }
-  }
-
-  // Método para cancelar um agendamento
-  Future<bool> cancelAppointment(String appointmentId) async {
-    try {
-      Timestamp now = Timestamp.now();
-      await _firestore.collection('appointments').doc(appointmentId).update({
-        'status': 'cancelado',
-        'updatedAt': now,
-        'updated_at': now,
-      });
-      return true;
-    } catch (e) {
-      debugPrint('Erro ao cancelar agendamento: $e');
-      return false;
-    }
-  }
-
-  // Método para fazer upload de documentos
-  Future<String?> uploadDocument(File file, String fileName) async {
-    try {
-      if (_currentUser == null) return null;
-
-      String filePath =
-          'documents/${_currentUser!.uid}/${DateTime.now().millisecondsSinceEpoch}_$fileName';
-      Reference ref = _storage.ref().child(filePath);
-
-      UploadTask uploadTask = ref.putFile(file);
-      TaskSnapshot snapshot = await uploadTask;
-
-      String downloadUrl = await snapshot.ref.getDownloadURL();
-      return downloadUrl;
-    } catch (e) {
-      debugPrint('Erro ao fazer upload do documento: $e');
-      return null;
-    }
-  }
-
-  // Método para atualizar perfil do usuário
-  Future<bool> updateUserProfile({
-    String? name,
-    String? phoneNumber,
-    String? address,
-    String? profileImageUrl,
-    String? rgCpfDocumentUrl,
-    String? cnhDocumentUrl,
-  }) async {
-    if (_currentUser == null) return false;
-
-    try {
-      Timestamp now = Timestamp.now();
-      Map<String, dynamic> updateData = {
-        'updatedAt': now,
-        'updated_at': now,
-      };
-
-      if (name != null) updateData['name'] = name;
-      if (phoneNumber != null) {
-        updateData['phoneNumber'] = phoneNumber;
-        updateData['phone_number'] = phoneNumber;
-      }
-      if (address != null) updateData['address'] = address;
-      if (profileImageUrl != null) {
-        updateData['profilePictureUrl'] = profileImageUrl;
-        updateData['profile_picture_url'] = profileImageUrl;
-        updateData['profile_image_url'] = profileImageUrl;
-      }
-      if (rgCpfDocumentUrl != null) {
-        updateData['rgCpfDocumentUrl'] = rgCpfDocumentUrl;
-        updateData['rg_cpf_document_url'] = rgCpfDocumentUrl;
-        updateData['rg_url'] = rgCpfDocumentUrl;
-      }
-      if (cnhDocumentUrl != null) {
-        updateData['cnhDocumentUrl'] = cnhDocumentUrl;
-        updateData['cnh_document_url'] = cnhDocumentUrl;
-        updateData['cnh_url'] = cnhDocumentUrl;
-      }
-
-      await _firestore
-          .collection('users')
-          .doc(_currentUser!.uid)
-          .update(updateData);
-
-      // Atualizar o usuário local
-      DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(_currentUser!.uid).get();
-
-      if (userDoc.exists) {
-        _currentUser = User.fromFirestore(userDoc);
-        notifyListeners();
-      }
-
-      return true;
-    } catch (e) {
-      debugPrint('Erro ao atualizar perfil: $e');
-      return false;
-    }
+    return userName;
   }
 
   // Método para tratar erros de autenticação
