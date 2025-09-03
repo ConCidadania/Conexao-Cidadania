@@ -1,10 +1,12 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum UserType { user, admin, lawyer }
+enum UserType { USER, ADMIN, LAWYER }
 
 class AppUser {
   String uid;
-  UserType type;
+  String type;
   String email;
   String phoneNumber;
   String firstName;
@@ -17,6 +19,7 @@ class AppUser {
   String cpf;
   String nationality;
   String naturality;
+  String registroOAB;
 
   // Address
   String street;
@@ -46,6 +49,7 @@ class AppUser {
     required this.cpf,
     required this.nationality,
     required this.naturality,
+    required this.registroOAB,
     required this.street,
     required this.number,
     this.complement,
@@ -62,7 +66,7 @@ class AppUser {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return AppUser(
       uid: doc.id,
-      type: data['type'] ?? UserType.user,
+      type: data['type'] ?? UserType.USER.name,
       email: data['email'] ?? '',
       phoneNumber: data['phoneNumber'] ?? '',
       firstName: data['firstName'] ?? '',
@@ -75,6 +79,7 @@ class AppUser {
       cpf: data['cpf'] ?? '',
       nationality: data['nationality'] ?? '',
       naturality: data['naturality'] ?? '',
+      registroOAB: data['registroOAB'] ?? '',
       street: data['street'] ?? '',
       number: data['number'] ?? '',
       complement: data['complement'] ?? '',
@@ -103,6 +108,7 @@ class AppUser {
       'cpf': cpf,
       'nationality': nationality,
       'naturality': naturality,
+      'registroOAB': registroOAB,
       'street': street,
       'number': number,
       'complement': complement,
@@ -119,7 +125,7 @@ class AppUser {
   static AppUser createEmpty() {
     return AppUser(
       uid: '',
-      type: UserType.user,
+      type: UserType.USER.name,
       email: '',
       phoneNumber: '',
       firstName: '',
@@ -129,6 +135,7 @@ class AppUser {
       cpf: '',
       nationality: '',
       naturality: '',
+      registroOAB: '',
       street: '',
       number: '',
       neighborhood: '',
@@ -138,6 +145,62 @@ class AppUser {
       postalCode: '',
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
+    );
+  }
+
+  AppUser copyWith({
+    String? uid,
+    String? type,
+    String? email,
+    String? phoneNumber,
+    String? firstName,
+    String? lastName,
+    String? profession,
+    String? gender,
+    String? civilStatus,
+    String? dateOfBirth,
+    String? rg,
+    String? cpf,
+    String? nationality,
+    String? naturality,
+    String? registroOAB,
+    String? street,
+    String? number,
+    String? complement,
+    String? neighborhood,
+    String? city,
+    String? state,
+    String? country,
+    String? postalCode,
+    Timestamp? createdAt,
+    Timestamp? updatedAt,
+  }) {
+    return AppUser(
+      uid: uid ?? this.uid,
+      type: type ?? this.type,
+      email: email ?? this.email,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      profession: profession ?? this.profession,
+      gender: gender ?? this.gender,
+      civilStatus: civilStatus ?? this.civilStatus,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      rg: rg ?? this.rg,
+      cpf: cpf ?? this.cpf,
+      nationality: nationality ?? this.nationality,
+      naturality: naturality ?? this.naturality,
+      registroOAB: registroOAB ?? this.registroOAB,
+      street: street ?? this.street,
+      number: number ?? this.number,
+      complement: complement ?? this.complement,
+      neighborhood: neighborhood ?? this.neighborhood,
+      city: city ?? this.city,
+      state: state ?? this.state,
+      country: country ?? this.country,
+      postalCode: postalCode ?? this.postalCode,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 

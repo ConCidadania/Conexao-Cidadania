@@ -1,6 +1,7 @@
 import 'package:app_mobile2/controller/user_controller.dart';
 import 'package:app_mobile2/view/home_view.dart';
 import 'package:app_mobile2/view/login_view.dart';
+import 'package:app_mobile2/view/manage_users_view.dart';
 import 'package:app_mobile2/view/recover_password_view.dart';
 import 'package:app_mobile2/view/register_address_info_view.dart';
 import 'package:app_mobile2/view/register_auth_info_view.dart';
@@ -39,6 +40,7 @@ class MainApp extends StatelessWidget {
         'registerPersonal1': (context) => const RegisterPersonalInfo1View(),
         'registerPersonal2': (context) => const RegisterPersonalInfo2View(),
         'registerAddress': (context) => const RegisterAddressInfoView(),
+        'manageUsers': (context) => const ManageUsersView(),
         'home': (context) => const HomeView(),
       },
     );

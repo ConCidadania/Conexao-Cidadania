@@ -71,6 +71,7 @@ class UserController extends ChangeNotifier {
         'cpf': _userRegistrationData!.cpf,
         'nationality': _userRegistrationData!.nationality,
         'naturality': _userRegistrationData!.naturality,
+        'registroOAB': _userRegistrationData!.registroOAB,
         'street': _userRegistrationData!.street,
         'number': _userRegistrationData!.number,
         'complement': _userRegistrationData!.complement,
@@ -131,6 +132,38 @@ class UserController extends ChangeNotifier {
     });
 
     return userName;
+  }
+
+  Future<String> getCurrentUserType() async {
+    var userType = 'USER';
+    await _firestore
+        .collection('users')
+        .where('uid', isEqualTo: getCurrentUserId())
+        .get()
+        .then((result) {
+      userType = result.docs[0].data()['type'] ?? 'USER';
+    });
+
+    return userType;
+  }
+
+  Stream<QuerySnapshot> fetchAllUsers(String field) {
+    var result = _firestore.collection('users').where('uid').orderBy(field);
+
+    return result.snapshots();
+  }
+
+  void editUser(context, userId, AppUser user) {
+    _firestore
+        .collection('users')
+        .doc(userId)
+        .update(
+          user.toFirestore(),
+        )
+        .then(
+          (value) => showMessage(context, "Usuário atualizado com sucesso!"),
+        )
+        .catchError((e) => showMessage(context, "Erro ao atualizar usuário"));
   }
 
   // Método para tratar erros de autenticação

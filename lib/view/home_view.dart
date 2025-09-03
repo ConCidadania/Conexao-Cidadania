@@ -20,8 +20,7 @@ class _HomeViewState extends State<HomeView> {
           future: ctrl.getCurrentUserName(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Text("Carregando...",
-                  style: TextStyle(color: Colors.white));
+              return Text("Carregando...", style: TextStyle(color: Colors.white));
             } else if (snapshot.hasError) {
               return Text("Bem Vindo Usuário!", style: TextStyle(color: Colors.white));
             } else {
@@ -54,6 +53,51 @@ class _HomeViewState extends State<HomeView> {
           ),
         ),
       ),
+      floatingActionButton: _buildFloatingActionButton(context),
+    );
+  }
+
+  Widget _buildFloatingActionButton(BuildContext context) {
+    return FutureBuilder<String>(
+      future: ctrl.getCurrentUserType(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return FloatingActionButton(
+            onPressed: () {},
+            backgroundColor: Color(0xFF00796B),
+            child: CircularProgressIndicator(color: Colors.white),
+          );
+        } else if (snapshot.hasError || snapshot.data == null) {
+          // Default para o tipo de usuário 'USER' em caso de erro
+          return FloatingActionButton(
+            onPressed: () {
+              Navigator.pushNamed(context, 'home');
+            },
+            backgroundColor: Color(0xFF00796B),
+            child: Icon(Icons.assignment_rounded, color: Color(0xFFB2DFDB)),
+          );
+        } else {
+          String userType = snapshot.data!;
+          IconData icon;
+          String route;
+
+          if (userType == "ADMIN") {
+            icon = Icons.assignment_ind_rounded;
+            route = 'manageUsers';
+          } else {
+            icon = Icons.assignment_rounded;
+            route = 'home';
+          }
+
+          return FloatingActionButton(
+            onPressed: () {
+             Navigator.pushNamed(context, route);
+            },
+            backgroundColor: Color(0xFF00796B),
+            child: Icon(icon, color: Color(0xFFB2DFDB)),
+          );
+        }
+      },
     );
   }
 }
