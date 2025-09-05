@@ -53,7 +53,7 @@ class _ManageUsersViewState extends State<ManageUsersView> {
               controller: _searchController,
               leading: const Icon(Icons.search),
               hintText: "Pesquisar por nome ou sobrenome",
-              padding: MaterialStateProperty.all(
+              padding: WidgetStateProperty.all(
                 EdgeInsets.symmetric(horizontal: 16.0),
               ),
             ),

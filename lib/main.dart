@@ -1,3 +1,4 @@
+import 'package:app_mobile2/controller/lawsuit_controller.dart';
 import 'package:app_mobile2/controller/user_controller.dart';
 import 'package:app_mobile2/view/home_view.dart';
 import 'package:app_mobile2/view/login_view.dart';
@@ -20,6 +21,7 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   g.registerSingleton<UserController>(UserController());
+  g.registerSingleton<LawsuitController>(LawsuitController());
 
   runApp(DevicePreview(enabled: true, builder: (context) => const MainApp()));
 }
