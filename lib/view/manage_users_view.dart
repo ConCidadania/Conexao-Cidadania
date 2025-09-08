@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:app_mobile2/controller/user_controller.dart';
-import 'package:app_mobile2/model/user_model.dart';
+import 'package:con_cidadania/controller/user_controller.dart';
+import 'package:con_cidadania/model/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ManageUsersView extends StatefulWidget {

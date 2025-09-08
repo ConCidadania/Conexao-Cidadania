@@ -1,4 +1,4 @@
-import 'package:app_mobile2/controller/user_controller.dart';
+import 'package:con_cidadania/controller/user_controller.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

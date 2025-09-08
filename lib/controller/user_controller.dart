@@ -1,5 +1,5 @@
-import 'package:app_mobile2/model/user_model.dart';
-import 'package:app_mobile2/view/components/message.dart';
+import 'package:con_cidadania/model/user_model.dart';
+import 'package:con_cidadania/view/components/message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
