@@ -1,3 +1,4 @@
+import 'package:con_cidadania/view/components/time.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:con_cidadania/controller/user_controller.dart';
@@ -37,7 +38,7 @@ class _HomeViewState extends State<HomeView> {
       'name': 'Alteração de Nome Social',
       'icon': Icons.drive_file_rename_outline,
     },
-    LawsuitType.INTER_INST_LONGA_PERM: {
+    LawsuitType.INTERNACAO_ILP: {
       'name': 'Internação em Instituto de Longa Permanência',
       'icon': Icons.elderly,
     },
@@ -148,7 +149,7 @@ class _HomeViewState extends State<HomeView> {
                         .map((doc) => Lawsuit.fromFirestore(doc))
                         .toList();
                     final filteredLawsuits = lawsuits.where((lawsuit) {
-                      return lawsuit.type.toLowerCase().contains(_searchQuery);
+                      return lawsuit.name.toLowerCase().contains(_searchQuery);
                     }).toList();
 
                     if (filteredLawsuits.isEmpty) {
@@ -161,7 +162,8 @@ class _HomeViewState extends State<HomeView> {
                         final lawsuit = filteredLawsuits[index];
                         return ListTile(
                           leading: Icon(Icons.assignment, color: primaryColor),
-                          title: Text(lawsuit.type),
+                          title: Text(lawsuit.name),
+                          subtitle: Text("Aberto em: ${lawsuit.createdAt}"),
                           onTap: () {
                             // TODO: Implement navigation or action on tap
                           },
@@ -253,8 +255,9 @@ class _HomeViewState extends State<HomeView> {
                       final userUid = userCtrl.getCurrentUserId();
                       final newLawsuit = Lawsuit(
                         owner: userUid,
+                        name: data['name'],
                         type: lawsuitType.name,
-                        createdAt: Timestamp.now(),
+                        createdAt: formatDate(DateTime.now()),
                       );
                       lawsuitCtrl.addLawsuit(context, newLawsuit);
                     },

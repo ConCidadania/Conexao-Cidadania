@@ -1,4 +1,5 @@
 import 'package:con_cidadania/controller/user_controller.dart';
+import 'package:con_cidadania/view/widgets/app_debug_login_bypass.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -159,6 +160,8 @@ class _LoginViewState extends State<LoginView> {
           ),
         ),
       ),
+      // DEBUG Login
+      floatingActionButton: AppDebugLoginBypass(context),
     );
   }
 }

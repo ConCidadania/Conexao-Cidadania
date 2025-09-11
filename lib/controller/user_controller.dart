@@ -8,6 +8,7 @@ class UserController extends ChangeNotifier {
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  AppUser _currentUser = AppUser.createEmpty();
   AppUser? _userRegistrationData;
 
   // Métodos para coleta de dados cadastrais
@@ -95,7 +96,9 @@ class UserController extends ChangeNotifier {
     _auth
         .signInWithEmailAndPassword(email: email, password: password)
         .then((result) async {
-      showMessage(context, "Usuário autenticado com sucesso!");
+      await _updateCurrentUser();
+      showMessage(context,
+          "Usuário ${_currentUser.firstName} autenticado com sucesso!");
       Navigator.pushReplacementNamed(context, 'home');
     }).catchError((e) {
       showMessage(context, _handleAuthError(e));
@@ -113,6 +116,7 @@ class UserController extends ChangeNotifier {
 
   // Método para fazer logout
   void logout() {
+    _currentUser = AppUser.createEmpty();
     _auth.signOut();
   }
 
@@ -121,8 +125,25 @@ class UserController extends ChangeNotifier {
     return user!.uid;
   }
 
+  Future<AppUser?> _updateCurrentUser() async {
+    await _firestore
+        .collection('users')
+        .where('uid', isEqualTo: getCurrentUserId())
+        .get()
+        .then((result) {
+      _currentUser = AppUser.fromFirestore(result.docs[0]);
+    });
+
+    return _currentUser;
+  }
+
+  AppUser? getCurrentUser() {
+    return _currentUser;
+  }
+
+  // TODO: Remove Future and FutureBuilder
   Future<String> getCurrentUserName() async {
-    var userName = '';
+    /*var userName = '';
     await _firestore
         .collection('users')
         .where('uid', isEqualTo: getCurrentUserId())
@@ -131,11 +152,14 @@ class UserController extends ChangeNotifier {
       userName = result.docs[0].data()['firstName'] ?? '';
     });
 
-    return userName;
+    return userName;*/
+
+    return _currentUser.firstName;
   }
 
+  // TODO: Remove Future and FutureBuilder
   Future<String> getCurrentUserType() async {
-    var userType = 'USER';
+    /*var userType = 'USER';
     await _firestore
         .collection('users')
         .where('uid', isEqualTo: getCurrentUserId())
@@ -144,7 +168,9 @@ class UserController extends ChangeNotifier {
       userType = result.docs[0].data()['type'] ?? 'USER';
     });
 
-    return userType;
+    return userType;*/
+
+    return _currentUser.type;
   }
 
   Stream<QuerySnapshot> fetchAllUsers(String field) {
