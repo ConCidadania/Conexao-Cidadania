@@ -1,7 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:con_cidadania/view/components/time.dart';
+import 'package:con_cidadania/utils/time.dart';
 
 enum LawsuitType {
   REMEDIO_ALTO_CUSTO,

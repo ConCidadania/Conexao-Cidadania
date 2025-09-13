@@ -1,11 +1,17 @@
 import 'package:con_cidadania/controller/user_controller.dart';
 import 'package:con_cidadania/model/lawsuit_model.dart';
-import 'package:con_cidadania/view/components/message.dart';
+import 'package:con_cidadania/utils/message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class LawsuitController extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  String _currentLawsuitId = '';
+
+  void setCurrentLawsuitId(String id) {
+    _currentLawsuitId = id;
+  }
 
   void addLawsuit(context, Lawsuit lawsuit) {
     _firestore
@@ -30,5 +36,14 @@ class LawsuitController extends ChangeNotifier {
     var result = _firestore.collection('lawsuits').where('uid').orderBy(field);
 
     return result.snapshots();
+  }
+
+  Future<DocumentSnapshot<Object?>> getCurrentLawsuit() async {
+    CollectionReference lawsuits = _firestore.collection('lawsuits');
+
+    Future<DocumentSnapshot<Object?>> result =
+        lawsuits.doc(_currentLawsuitId).get();
+
+    return result;
   }
 }

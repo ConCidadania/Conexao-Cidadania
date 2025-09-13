@@ -2,6 +2,7 @@ import 'package:con_cidadania/controller/lawsuit_controller.dart';
 import 'package:con_cidadania/controller/user_controller.dart';
 import 'package:con_cidadania/view/home_view.dart';
 import 'package:con_cidadania/view/login_view.dart';
+import 'package:con_cidadania/view/manage_lawsuit_view.dart';
 import 'package:con_cidadania/view/manage_users_view.dart';
 import 'package:con_cidadania/view/recover_password_view.dart';
 import 'package:con_cidadania/view/register_address_info_view.dart';
@@ -43,6 +44,7 @@ class MainApp extends StatelessWidget {
         'registerPersonal2': (context) => const RegisterPersonalInfo2View(),
         'registerAddress': (context) => const RegisterAddressInfoView(),
         'manageUsers': (context) => const ManageUsersView(),
+        'manageLawsuit': (context) => const ManageLawsuitView(),
         'home': (context) => const HomeView(),
       },
     );

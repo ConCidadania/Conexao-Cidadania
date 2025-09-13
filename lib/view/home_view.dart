@@ -1,4 +1,4 @@
-import 'package:con_cidadania/view/components/time.dart';
+import 'package:con_cidadania/utils/time.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:con_cidadania/controller/user_controller.dart';
@@ -165,7 +165,10 @@ class _HomeViewState extends State<HomeView> {
                           title: Text(lawsuit.name),
                           subtitle: Text("Aberto em: ${lawsuit.createdAt}"),
                           onTap: () {
-                            // TODO: Implement navigation or action on tap
+                            // NOTE: "streamsnapshot.data.docs[index] não corresponde com a lista de busca"
+                            // TODO: Fazer funcionar mesmo com a lista filtrada de busca 
+                            lawsuitCtrl.setCurrentLawsuitId(streamSnapshot.data!.docs[index].id);
+                            Navigator.pushNamed(context, 'manageLawsuit');
                           },
                         );
                       },
@@ -227,7 +230,7 @@ class _HomeViewState extends State<HomeView> {
         return AlertDialog(
           title: Text("Selecione o tipo de Ação Judicial",
               textAlign: TextAlign.center),
-          content: Container(
+          content: SizedBox(
             width: MediaQuery.of(context).size.width * 0.8,
             height: MediaQuery.of(context).size.height * 0.6,
             child: GridView.builder(
