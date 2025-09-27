@@ -85,7 +85,8 @@ class UserController extends ChangeNotifier {
         'updatedAt': Timestamp.now(),
       });
       showMessage(context, 'Usuário criado com sucesso');
-      Navigator.pushReplacementNamed(context, 'login');
+      Navigator.pushNamedAndRemoveUntil(
+          context, 'login', (Route<dynamic> route) => false);
     }).catchError((e) {
       showMessage(context, _handleAuthError(e));
     });
@@ -99,7 +100,8 @@ class UserController extends ChangeNotifier {
       await _updateCurrentUser();
       showMessage(context,
           "Usuário ${_currentUser.firstName} autenticado com sucesso!");
-      Navigator.pushReplacementNamed(context, 'home');
+      Navigator.pushNamedAndRemoveUntil(
+          context, 'home', (Route<dynamic> route) => false);
     }).catchError((e) {
       showMessage(context, _handleAuthError(e));
     });

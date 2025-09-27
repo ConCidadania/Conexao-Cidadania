@@ -1,14 +1,32 @@
+//--controllers----------------------------------------------------------------
 import 'package:con_cidadania/controller/lawsuit_controller.dart';
 import 'package:con_cidadania/controller/user_controller.dart';
-import 'package:con_cidadania/view/home_view.dart';
-import 'package:con_cidadania/view/login_view.dart';
-import 'package:con_cidadania/view/manage_lawsuit_view.dart';
-import 'package:con_cidadania/view/manage_users_view.dart';
-import 'package:con_cidadania/view/recover_password_view.dart';
-import 'package:con_cidadania/view/register_address_info_view.dart';
-import 'package:con_cidadania/view/register_auth_info_view.dart';
-import 'package:con_cidadania/view/register_personal_info1_view.dart';
-import 'package:con_cidadania/view/register_personal_info2_view.dart';
+// --views--------------------------------------------------------------------
+
+// old views for safety
+// import 'package:con_cidadania/view/home_view.dart';
+// import 'package:con_cidadania/view/login_view.dart';
+// import 'package:con_cidadania/view/manage_lawsuit_view.dart';
+// import 'package:con_cidadania/view/manage_users_view.dart';
+// import 'package:con_cidadania/view/manage_users_view.dart';
+// import 'package:con_cidadania/view/register_auth_info_view.dart';
+// import 'package:con_cidadania/view/register_personal_info1_view.dart';
+// import 'package:con_cidadania/view/register_personal_info2_view.dart';
+// import 'package:con_cidadania/view/recover_password_view.dart';
+// import 'package:con_cidadania/view/register_address_info_view.dart';
+
+// new views
+import 'package:con_cidadania/view/styled_home_view.dart';
+import 'package:con_cidadania/view/styled_login_view.dart';
+import 'package:con_cidadania/view/styled_manage_lawsuit_view.dart';
+import 'package:con_cidadania/view/styled_manage_users_view.dart';
+import 'package:con_cidadania/view/styled_register_auth_info_view.dart';
+import 'package:con_cidadania/view/styled_register_personal_info1_view.dart';
+import 'package:con_cidadania/view/styled_register_personal_info2_view.dart';
+import 'package:con_cidadania/view/styled_recover_password_view.dart';
+import 'package:con_cidadania/view/styled_register_address_info_view.dart';
+
+//---packages--------------------------------------------------------------------
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
