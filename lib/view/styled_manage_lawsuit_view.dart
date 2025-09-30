@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:con_cidadania/controller/lawsuit_controller.dart';
+import 'package:con_cidadania/model/lawsuit_model.dart';
+import 'package:con_cidadania/view/widgets/document_upload_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
@@ -378,6 +380,18 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                   ],
                 ),
 
+                SizedBox(height: 16),
+                // 1. Upload de Documento de Identidade
+                DocumentUploadCard(
+                  documentName: DocumentType.documento_identidade.name,
+                  documentTitle: 'Documento de Identidade (RG, CNH, Certidão)',
+                ),
+
+                // 2. Upload de Comprovante de Endereço
+                DocumentUploadCard(
+                  documentName: DocumentType.comprovante_endereco.name,
+                  documentTitle: 'Comprovante de Endereço',
+                ),
                 SizedBox(height: 16),
 
                 // Status Card

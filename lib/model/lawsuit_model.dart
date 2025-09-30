@@ -11,6 +11,11 @@ enum LawsuitType {
   INTERNACAO_ILP
 }
 
+enum DocumentType {
+  documento_identidade,
+  comprovante_endereco,
+}
+
 class Lawsuit {
   String? uid;
   String name;
@@ -24,8 +29,7 @@ class Lawsuit {
   String createdAt;
 
   Lawsuit(
-      {
-      this.uid,
+      {this.uid,
       required this.name,
       required this.type,
       required this.ownerId,
