@@ -12,32 +12,52 @@ enum LawsuitType {
 }
 
 class Lawsuit {
-  String owner;
+  String? uid;
   String name;
   String type;
+  String ownerId;
+  String ownerFirstName;
+  String ownerLastName;
+  String ownerPhoneNumber;
+  String ownerEmail;
 
   String createdAt;
 
   Lawsuit(
-      {required this.owner,
+      {
+      this.uid,
       required this.name,
       required this.type,
+      required this.ownerId,
+      required this.ownerFirstName,
+      required this.ownerLastName,
+      required this.ownerPhoneNumber,
+      required this.ownerEmail,
       required this.createdAt});
 
   factory Lawsuit.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return Lawsuit(
-        owner: data['owner'] ?? '',
+        uid: doc.id,
         name: data['name'] ?? '',
         type: data['type'] ?? '',
+        ownerId: data['ownerId'] ?? '',
+        ownerFirstName: data['ownerFirstName'] ?? '',
+        ownerLastName: data['ownerLastName'] ?? '',
+        ownerPhoneNumber: data['ownerPhoneNumber'] ?? '',
+        ownerEmail: data['ownerEmail'] ?? '',
         createdAt: data['createdAt'] ?? formatDate(DateTime.now()));
   }
 
   Map<String, dynamic> toFirestore() {
     return <String, dynamic>{
-      'owner': owner,
       'name': name,
       'type': type,
+      'ownerId': ownerId,
+      'ownerFirstName': ownerFirstName,
+      'ownerLastName': ownerLastName,
+      'ownerPhoneNumber': ownerPhoneNumber,
+      'ownerEmail': ownerEmail,
       'createdAt': createdAt,
     };
   }

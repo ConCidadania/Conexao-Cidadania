@@ -9,24 +9,23 @@ class LawsuitController extends ChangeNotifier {
 
   String _currentLawsuitId = '';
 
-  void setCurrentLawsuitId(String id) {
-    _currentLawsuitId = id;
+  void setCurrentLawsuitId(String? id) {
+    _currentLawsuitId = id!;
   }
 
   void addLawsuit(context, Lawsuit lawsuit) {
-    _firestore
-        .collection('lawsuits')
-        .add(lawsuit.toFirestore())
-        .then(
-          (value) => showMessage(context, 'Ação adicionada com suceso'),
-        )
-        .catchError((error) => showMessage(context, 'Erro ao adicionar ação'));
+    _firestore.collection('lawsuits').add(lawsuit.toFirestore()).then((result) {
+      result.set({'uid': result.id}, SetOptions(merge: true));
+      showMessage(context, 'Ação adicionada com suceso');
+    }).catchError((error) {
+      showMessage(context, 'Erro ao adicionar ação');
+    });
   }
 
   Stream<QuerySnapshot> fetchUserLawsuits(String field) {
     var result = _firestore
         .collection('lawsuits')
-        .where('owner', isEqualTo: UserController().getCurrentUserId())
+        .where('ownerId', isEqualTo: UserController().getCurrentUserId())
         .orderBy(field);
 
     return result.snapshots();

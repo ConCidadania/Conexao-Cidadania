@@ -227,9 +227,9 @@ class _HomeViewState extends State<HomeView> {
         Stream<QuerySnapshot> lawsuitStream;
 
         if (userType == "USER") {
-          lawsuitStream = lawsuitCtrl.fetchUserLawsuits("owner");
+          lawsuitStream = lawsuitCtrl.fetchUserLawsuits("ownerId");
         } else {
-          lawsuitStream = lawsuitCtrl.fetchAllLawsuits("owner");
+          lawsuitStream = lawsuitCtrl.fetchAllLawsuits("ownerId");
         }
 
         return StreamBuilder<QuerySnapshot>(
@@ -262,7 +262,7 @@ class _HomeViewState extends State<HomeView> {
               itemBuilder: (context, index) {
                 final lawsuit = filteredLawsuits[index];
                 return _buildLawsuitCard(
-                    lawsuit, streamSnapshot.data!.docs[index]);
+                    lawsuit);
               },
             );
           },
@@ -271,7 +271,7 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  Widget _buildLawsuitCard(Lawsuit lawsuit, DocumentSnapshot doc) {
+  Widget _buildLawsuitCard(Lawsuit lawsuit) {
     LawsuitType? lawsuitType;
     try {
       lawsuitType = LawsuitType.values.firstWhere(
@@ -294,7 +294,7 @@ class _HomeViewState extends State<HomeView> {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () {
-            lawsuitCtrl.setCurrentLawsuitId(doc.id);
+            lawsuitCtrl.setCurrentLawsuitId(lawsuit.uid);
             Navigator.pushNamed(context, 'manageLawsuit');
           },
           child: Padding(
@@ -613,10 +613,15 @@ class _HomeViewState extends State<HomeView> {
                       Navigator.of(context).pop();
 
                       final userUid = userCtrl.getCurrentUserId();
+                      final user = userCtrl.getCurrentUser();
                       final newLawsuit = Lawsuit(
-                        owner: userUid,
                         name: data['name'],
                         type: lawsuitType.name,
+                        ownerId: userUid,
+                        ownerFirstName: user!.firstName,
+                        ownerLastName: user.lastName,
+                        ownerPhoneNumber: user.phoneNumber,
+                        ownerEmail: user.email,
                         createdAt: formatDate(DateTime.now()),
                       );
                       lawsuitCtrl.addLawsuit(context, newLawsuit);

@@ -1,4 +1,4 @@
-import 'package:con_cidadania/utils/time.dart';
+//import 'package:con_cidadania/utils/time.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:con_cidadania/controller/user_controller.dart';
@@ -255,14 +255,14 @@ class _HomeViewState extends State<HomeView> {
                     onTap: () async {
                       Navigator.of(context).pop();
 
-                      final userUid = userCtrl.getCurrentUserId();
-                      final newLawsuit = Lawsuit(
-                        owner: userUid,
-                        name: data['name'],
-                        type: lawsuitType.name,
-                        createdAt: formatDate(DateTime.now()),
-                      );
-                      lawsuitCtrl.addLawsuit(context, newLawsuit);
+                     // final userUid = userCtrl.getCurrentUserId();
+                     // final newLawsuit = Lawsuit(
+                     //   owner: userUid,
+                     //   name: data['name'],
+                     //   type: lawsuitType.name,
+                     //   createdAt: formatDate(DateTime.now()),
+                     // );
+                     // lawsuitCtrl.addLawsuit(context, newLawsuit);
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
