@@ -65,6 +65,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     }
   }
 
+  // ignore: unused_element
   Color _getLawsuitColor(String type) {
     switch (type) {
       case 'REMEDIO_ALTO_CUSTO':

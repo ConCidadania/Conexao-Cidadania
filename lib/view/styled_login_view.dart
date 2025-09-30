@@ -255,7 +255,7 @@ class _LoginViewState extends State<LoginView> {
                   SizedBox(height: 24.0),
 
                   // Login Button
-                  Container(
+                  SizedBox(
                     height: 56,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -293,7 +293,7 @@ class _LoginViewState extends State<LoginView> {
                   Row(
                     children: [
                       Expanded(
-                        child: Container(
+                        child: SizedBox(
                           height: 48,
                           child: OutlinedButton(
                             style: OutlinedButton.styleFrom(
@@ -319,11 +319,11 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       SizedBox(width: 12.0),
                       Expanded(
-                        child: Container(
+                        child: SizedBox(
                           height: 48,
                           child: TextButton(
                             style: TextButton.styleFrom(
-                              foregroundColor: AppColors.darkGreen,
+                              foregroundColor: AppColors.mainGreen,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12.0),
                               ),

@@ -41,6 +41,7 @@ class _RegisterAuthInfoViewState extends State<RegisterAuthInfoView> {
     super.dispose();
   }
 
+  // ignore: unused_element
   String _formatPhoneNumber(String phone) {
     // Remove all non-digits
     String digits = phone.replaceAll(RegExp(r'\D'), '');
@@ -575,13 +576,13 @@ class _RegisterAuthInfoViewState extends State<RegisterAuthInfoView> {
   }
 
   Widget _buildGoogleSignInButton() {
-    return Container(
+    return SizedBox(
       height: 56,
       child: OutlinedButton.icon(
         onPressed: () {
           _showComingSoonDialog();
         },
-        icon: Container(
+        icon: SizedBox(
           width: 24,
           height: 24,
           child: Icon(Icons.g_mobiledata, color: AppColors.redColor, size: 24),

@@ -197,7 +197,7 @@ class _RecoverPasswordViewState extends State<RecoverPasswordView> {
         SizedBox(height: 24.0),
 
         // Send Email Button
-        Container(
+        SizedBox(
           height: 56,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -239,7 +239,7 @@ class _RecoverPasswordViewState extends State<RecoverPasswordView> {
         SizedBox(height: 24.0),
 
         // Back to Login Button
-        Container(
+        SizedBox(
           height: 48,
           child: OutlinedButton(
             style: OutlinedButton.styleFrom(

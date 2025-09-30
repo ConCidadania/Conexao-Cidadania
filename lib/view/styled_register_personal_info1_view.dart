@@ -623,7 +623,7 @@ class _RegisterPersonalInfo1ViewState extends State<RegisterPersonalInfo1View> {
       try {
         ctrl.updatePersonalInfo1(
             firstName, lastName, profession, gender, civilStatus);
-        Navigator.pushNamed(context, 'registerAddress');
+        Navigator.pushNamed(context, 'registerPersonal2');
       } catch (e) {
         // Error handling is likely done in the controller
       } finally {

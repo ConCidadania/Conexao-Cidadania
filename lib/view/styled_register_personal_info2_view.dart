@@ -650,7 +650,7 @@ class _RegisterPersonalInfo2ViewState extends State<RegisterPersonalInfo2View> {
       try {
         ctrl.updatePersonalInfo2(
             formatDate(dateOfBirth!), rg, cpf, nationality, naturality);
-        Navigator.pushNamed(context, 'registerAuth');
+        Navigator.pushNamed(context, 'registerAddress');
       } catch (e) {
         // Error handling is likely done in the controller
       } finally {
