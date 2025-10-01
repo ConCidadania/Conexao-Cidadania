@@ -14,6 +14,8 @@ class LawsuitController extends ChangeNotifier {
 
   String _currentLawsuitId = '';
 
+  String get currentLawsuitId => _currentLawsuitId;
+
   void setCurrentLawsuitId(String? id) {
     _currentLawsuitId = id!;
   }
@@ -32,18 +34,17 @@ class LawsuitController extends ChangeNotifier {
     final userId = userCtrl.getCurrentUserId();
 
     try {
-      // Define o caminho no Firebase Storage
       final String path = 'files/users/$userId/docs/$documentName';
       final Reference ref = _storage.ref().child(path);
 
-      // Metadados para a extensão do arquivo
-      final metadata = SettableMetadata(contentType: getContentType(fileName));
+      final SettableMetadata metadata = SettableMetadata(
+        contentType: getContentType(fileName),
+        contentDisposition: 'attachment; filename="$fileName"',
+      );
 
-      // Realiza o upload do arquivo
       final UploadTask uploadTask = ref.putData(fileData, metadata);
       final TaskSnapshot snapshot = await uploadTask;
 
-      // Retorna a URL de download
       final String downloadUrl = await snapshot.ref.getDownloadURL();
 
       debugPrint(
@@ -52,7 +53,6 @@ class LawsuitController extends ChangeNotifier {
     } on FirebaseException catch (e) {
       debugPrint(
           "Erro no Firebase Storage ao fazer upload de $documentName: ${e.message}");
-      // Você pode adicionar um tratamento de erro mais específico aqui (e.g., showMessage)
       return null;
     } catch (e) {
       debugPrint("Erro desconhecido ao fazer upload de $documentName: $e");
@@ -60,10 +60,37 @@ class LawsuitController extends ChangeNotifier {
     }
   }
 
+  /* Obtém a URL de download de um arquivo do Firebase Storage.
+   * Esta URL pode ser usada no Flutter Web para abrir o arquivo em uma nova aba,
+   * ou disparar o download local do arquivo no dispositivo
+   * 
+   * Retorna a URL de download (String) ou null em caso de erro.
+   */
+  Future<String?> getDocumentDownloadURL(String storagePath) async {
+    try {
+      final Reference ref = _storage.ref().child(storagePath);
+
+      // Obtém a URL pública de download
+      final String downloadUrl = await ref.getDownloadURL();
+
+      debugPrint(
+          "Download URL obtida com sucesso para o caminho: $storagePath");
+
+      return downloadUrl;
+    } on FirebaseException catch (e) {
+      debugPrint(
+          "Erro no Firebase Storage ao obter URL de $storagePath: ${e.message}");
+      return null;
+    } catch (e) {
+      debugPrint("Erro desconhecido ao obter URL de $storagePath: $e");
+      return null;
+    }
+  }
+
   Stream<QuerySnapshot> fetchUserLawsuits(String field) {
     var result = _firestore
         .collection('lawsuits')
-        .where('ownerId', isEqualTo: UserController().getCurrentUserId())
+        .where('ownerId', isEqualTo: userCtrl.getCurrentUserId())
         .orderBy(field);
 
     return result.snapshots();
@@ -96,6 +123,6 @@ String? getContentType(String fileName) {
     case 'pdf':
       return 'application/pdf';
     default:
-      return null; // Let Firebase infer or set a default
+      return null;
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:con_cidadania/view/widgets/document_preview_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:file_picker/file_picker.dart';
@@ -25,6 +26,8 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
   String? _selectedFileName;
   bool _isUploading = false;
   String? _uploadStatus;
+  // Variável para armazenar a URL de download após o upload
+  String? _uploadedFileUrl; 
 
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -37,25 +40,23 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
         _selectedFileBytes = result.files.first.bytes;
         _selectedFileName = result.files.first.name;
         _uploadStatus = null; // Limpa o status ao selecionar novo arquivo
+        // Limpa a URL, pois um novo arquivo será enviado
+        _uploadedFileUrl = null; 
       });
     }
   }
 
   Future<void> _uploadFile() async {
-    if (_selectedFileBytes == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Por favor, selecione um arquivo primeiro.")),
-      );
-      return;
-    }
+    if (_selectedFileBytes == null) return;
 
     setState(() {
       _isUploading = true;
-      _uploadStatus = "Fazendo upload...";
+      _uploadStatus = "Enviando $_selectedFileName...";
+      _uploadedFileUrl = null;
     });
 
-    // Chama o método uploadDocument do controller
-    String? fileUrl = await lawsuitCtrl.uploadDocument(
+    // Chama o método do controller para upload
+    final String? downloadUrl = await lawsuitCtrl.uploadDocument(
       widget.documentName,
       _selectedFileName!,
       _selectedFileBytes!,
@@ -63,132 +64,152 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
 
     setState(() {
       _isUploading = false;
-      if (fileUrl != null) {
-        _uploadStatus = "Upload Concluído!";
-        // TODO: Você pode querer armazenar o fileUrl no modelo da Lawsuit aqui
+      if (downloadUrl != null) {
+        _uploadStatus = "Upload Concluído para: $_selectedFileName";
+        // Salva a URL retornada após o sucesso
+        _uploadedFileUrl = downloadUrl; 
       } else {
-        _uploadStatus = "Falha no Upload.";
-        _selectedFileBytes = null;
+        _uploadStatus = "Erro no Upload. Tente novamente.";
+        _uploadedFileUrl = null;
       }
     });
+  }
 
-    // Mostrar feedback ao usuário
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(fileUrl != null
-            ? "Documento ${widget.documentTitle} enviado com sucesso!"
-            : "Erro ao enviar documento. Tente novamente."),
-        backgroundColor:
-            fileUrl != null ? AppColors.mainGreen : AppColors.redColor,
-      ),
-    );
+  // Método para exibir a pré-visualização e download
+  void _showPreviewDialog() {
+    if (_uploadedFileUrl != null) {
+      showDialog(
+        context: context,
+        builder: (context) => DocumentPreviewDialog(
+          documentTitle: widget.documentTitle,
+          storagePath: widget.documentName, // O path para buscar ou o nome do arquivo
+          uploadedFileUrl: _uploadedFileUrl, // Passa a URL já conhecida
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Verifica se o card pode ser clicado para preview
+    final bool isPreviewAvailable = _uploadedFileUrl != null && !_isUploading;
+
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 8.0),
-      elevation: 2,
+      margin: EdgeInsets.only(bottom: 16.0),
+      elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Título do Documento
-            Text(
-              widget.documentTitle,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: AppColors.mainGreen,
-              ),
-            ),
-            SizedBox(height: 10),
-
-            // Exibição do Arquivo Selecionado e Status
-            Row(
-              children: [
-                Icon(
-                  _selectedFileBytes == null
-                      ? Icons.attach_file
-                      : Icons.insert_drive_file,
-                  color: AppColors.mediumGrey,
-                ),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    _selectedFileName ??
-                        "Nenhum arquivo selecionado (PDF/JPG/PNG)",
-                    style: TextStyle(
-                      fontStyle: _selectedFileBytes == null
-                          ? FontStyle.italic
-                          : FontStyle.normal,
-                      color: _selectedFileBytes == null
-                          ? AppColors.mediumGrey
-                          : AppColors.blackColor,
+      // Envolver o Card em InkWell para capturar o onTap
+      child: InkWell(
+        // O onTap só funciona se o arquivo estiver anexado (uploaded)
+        onTap: isPreviewAvailable ? _showPreviewDialog : null,
+        borderRadius: BorderRadius.circular(12), 
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Ícone de status de arquivo
+                  Icon(
+                    _uploadedFileUrl != null
+                        ? Icons.check_circle // Arquivo anexado
+                        : _selectedFileBytes != null
+                            ? Icons.insert_drive_file // Arquivo selecionado
+                            : Icons.upload_file, // Padrão
+                    size: 24,
+                    color: _uploadedFileUrl != null
+                        ? AppColors.darkGreen
+                        : AppColors.mainGreen,
+                  ),
+                  SizedBox(width: 8),
+                  // Título do documento
+                  Expanded(
+                    child: Text(
+                      widget.documentTitle,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.blackColor,
+                      ),
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
+                  
+                  // Ícone de visualização
+                  if (isPreviewAvailable)
+                    Icon(Icons.visibility, color: AppColors.mediumGrey),
+                ],
+              ),
+              Divider(height: 20, color: AppColors.lightGrey),
 
-            // Botões de Ação
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Botão Selecionar
-                ElevatedButton.icon(
-                  onPressed: _isUploading ? null : _pickFile,
-                  icon: Icon(Icons.folder_open, size: 18),
-                  label: Text("Selecionar"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.mainGreen,
-                    foregroundColor: AppColors.lightGrey,
-                  ),
-                ),
-
-                // Botão Upload
-                ElevatedButton.icon(
-                  onPressed: _selectedFileBytes != null && !_isUploading
-                      ? _uploadFile
-                      : null,
-                  icon: _isUploading
-                      ? SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Icon(Icons.cloud_upload, size: 18),
-                  label: Text(_isUploading ? "Enviando..." : "Upload"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.mainGreen,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-
-            // Status de Upload
-            if (_uploadStatus != null)
+              // Exibe o nome do arquivo atual ou um placeholder
               Padding(
-                padding: const EdgeInsets.only(top: 8.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
-                  _uploadStatus!,
+                  _selectedFileName ?? "Nenhum arquivo selecionado.",
                   style: TextStyle(
-                    color: _uploadStatus!.contains("Concluído")
-                        ? AppColors.mainGreen
-                        : AppColors.redColor,
-                    fontWeight: FontWeight.bold,
+                    color: AppColors.mediumGrey,
+                    fontStyle: _selectedFileName == null ? FontStyle.italic : null,
                   ),
                 ),
               ),
-          ],
+
+              // Ações (Botões) - Seleção e Upload
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: _pickFile,
+                    icon: Icon(Icons.folder_open, size: 18, color: AppColors.mainGreen),
+                    label: Text(_selectedFileBytes != null ? "Trocar Arquivo" : "Selecionar Arquivo"),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.mainGreen,
+                    ),
+                  ),
+
+                  SizedBox(width: 10),
+
+                  // Botão Upload
+                  ElevatedButton.icon(
+                    onPressed: _selectedFileBytes != null && !_isUploading
+                        ? _uploadFile
+                        : null,
+                    icon: _isUploading
+                        ? SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Icon(Icons.cloud_upload, size: 18),
+                    label: Text(_isUploading ? "Enviando..." : "Upload"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.mainGreen,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+
+              // Status de Upload
+              if (_uploadStatus != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    _uploadStatus!,
+                    style: TextStyle(
+                      color: _uploadStatus!.contains("Concluído")
+                          ? AppColors.mainGreen
+                          : AppColors.redColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

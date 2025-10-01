@@ -381,17 +381,30 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                 ),
 
                 SizedBox(height: 16),
-                // 1. Upload de Documento de Identidade
-                DocumentUploadCard(
-                  documentName: DocumentType.documento_identidade.name,
-                  documentTitle: 'Documento de Identidade (RG, CNH, Certidão)',
+
+                // Documents Card
+                _buildInfoCard(
+                  title: "Anexar Documentos",
+                  icon: Icons.attach_file_rounded,
+                  color: AppColors.darkGreen,
+                  children: [
+                    // 1. Upload de Documento de Identidade
+                    DocumentUploadCard(
+                      documentName: DocumentType.documento_identidade.name,
+                      documentTitle:
+                          'Documento de Identidade (RG, CNH, Certidão)',
+                    ),
+
+                    // 2. Upload de Comprovante de Endereço
+                    DocumentUploadCard(
+                      documentName: DocumentType.comprovante_endereco.name,
+                      documentTitle: 'Comprovante de Endereço',
+                    ),
+
+                    // TODO: build cards for lawsuit specific documents
+                  ],
                 ),
 
-                // 2. Upload de Comprovante de Endereço
-                DocumentUploadCard(
-                  documentName: DocumentType.comprovante_endereco.name,
-                  documentTitle: 'Comprovante de Endereço',
-                ),
                 SizedBox(height: 16),
 
                 // Status Card
