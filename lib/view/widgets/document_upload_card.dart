@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:con_cidadania/controller/user_controller.dart';
 import 'package:con_cidadania/view/widgets/document_preview_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -21,13 +22,21 @@ class DocumentUploadCard extends StatefulWidget {
 }
 
 class _DocumentUploadCardState extends State<DocumentUploadCard> {
+  final UserController userCtrl = GetIt.I.get<UserController>();
   final LawsuitController lawsuitCtrl = GetIt.I.get<LawsuitController>();
   Uint8List? _selectedFileBytes;
   String? _selectedFileName;
   bool _isUploading = false;
   String? _uploadStatus;
   // Variável para armazenar a URL de download após o upload
-  String? _uploadedFileUrl; 
+  String? _uploadedFileUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    // Carrega a url de download se existir
+    _tryLoadFile();
+  }
 
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -41,9 +50,36 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
         _selectedFileName = result.files.first.name;
         _uploadStatus = null; // Limpa o status ao selecionar novo arquivo
         // Limpa a URL, pois um novo arquivo será enviado
-        _uploadedFileUrl = null; 
+        _uploadedFileUrl = null;
       });
     }
+  }
+
+  Future<void> _tryLoadFile() async {
+    setState(() {
+      _isUploading = true;
+      _uploadStatus = "Carregando ...";
+      _uploadedFileUrl = null;
+    });
+
+    // Recupera a url de download se existir
+    final String storePath =
+        'files/users/${userCtrl.getCurrentUserId()}/docs/${widget.documentName}';
+    final String? downloadUrl =
+        await lawsuitCtrl.getDocumentDownloadURL(storePath);
+
+    setState(() {
+      _isUploading = false;
+      if (downloadUrl != null) {
+        _selectedFileName = widget.documentName;
+        _uploadStatus = "Carregamento Concluído para: $_selectedFileName";
+        // Salva a URL retornada após o sucesso
+        _uploadedFileUrl = downloadUrl;
+      } else {
+        _uploadStatus = null;
+        _uploadedFileUrl = null;
+      }
+    });
   }
 
   Future<void> _uploadFile() async {
@@ -67,7 +103,7 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
       if (downloadUrl != null) {
         _uploadStatus = "Upload Concluído para: $_selectedFileName";
         // Salva a URL retornada após o sucesso
-        _uploadedFileUrl = downloadUrl; 
+        _uploadedFileUrl = downloadUrl;
       } else {
         _uploadStatus = "Erro no Upload. Tente novamente.";
         _uploadedFileUrl = null;
@@ -82,7 +118,8 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
         context: context,
         builder: (context) => DocumentPreviewDialog(
           documentTitle: widget.documentTitle,
-          storagePath: widget.documentName, // O path para buscar ou o nome do arquivo
+          storagePath:
+              widget.documentName, // O path para buscar ou o nome do arquivo
           uploadedFileUrl: _uploadedFileUrl, // Passa a URL já conhecida
         ),
       );
@@ -102,7 +139,7 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
       child: InkWell(
         // O onTap só funciona se o arquivo estiver anexado (uploaded)
         onTap: isPreviewAvailable ? _showPreviewDialog : null,
-        borderRadius: BorderRadius.circular(12), 
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -135,7 +172,7 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
                       ),
                     ),
                   ),
-                  
+
                   // Ícone de visualização
                   if (isPreviewAvailable)
                     Icon(Icons.visibility, color: AppColors.mediumGrey),
@@ -150,7 +187,8 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
                   _selectedFileName ?? "Nenhum arquivo selecionado.",
                   style: TextStyle(
                     color: AppColors.mediumGrey,
-                    fontStyle: _selectedFileName == null ? FontStyle.italic : null,
+                    fontStyle:
+                        _selectedFileName == null ? FontStyle.italic : null,
                   ),
                 ),
               ),
@@ -161,8 +199,11 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
                 children: [
                   TextButton.icon(
                     onPressed: _pickFile,
-                    icon: Icon(Icons.folder_open, size: 18, color: AppColors.mainGreen),
-                    label: Text(_selectedFileBytes != null ? "Trocar Arquivo" : "Selecionar Arquivo"),
+                    icon: Icon(Icons.folder_open,
+                        size: 18, color: AppColors.mainGreen),
+                    label: Text(_selectedFileBytes != null
+                        ? "Trocar Arquivo"
+                        : "Selecionar Arquivo"),
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.mainGreen,
                     ),
