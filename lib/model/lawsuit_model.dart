@@ -12,8 +12,17 @@ enum LawsuitType {
 }
 
 enum DocumentType {
+  // Em comum
   documento_identidade,
   comprovante_endereco,
+  // Vaga em creche pública
+  protocolo_inscricao_creche,
+  documento_identidade_crianca,
+  // Remédio de alto custo
+  copia_prontuario_medico,
+  copia_receituario_medico,
+  expediente_administrativo_secretaria_saude,
+  tres_ultimos_holerites,
 }
 
 class Lawsuit {

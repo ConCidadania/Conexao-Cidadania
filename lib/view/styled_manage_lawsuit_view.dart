@@ -269,6 +269,61 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     );
   }
 
+  Widget _buildUniqueDocUploadCards(String lawsuitType) {
+    switch (lawsuitType) {
+      case 'VAGA_CRECHE_PUBLICA':
+        return Column(
+          children: [
+            // 1. Upload Protocolo de Inscrição na Creche
+            DocumentUploadCard(
+              documentName: DocumentType.protocolo_inscricao_creche.name,
+              documentTitle: 'Protocolo de Inscrição na Creche',
+            ),
+
+            // 2. Upload Documento Pessoal da Criança
+            DocumentUploadCard(
+              documentName: DocumentType.documento_identidade_crianca.name,
+              documentTitle:
+                  'Documento Pessoal da Criança (Cetidão de Nascimento, RG)',
+            ),
+          ],
+        );
+      case 'REMEDIO_ALTO_CUSTO':
+        return Column(
+          children: [
+            // 1. Upload Cópia do Prontuário Médico
+            DocumentUploadCard(
+              documentName: DocumentType.copia_prontuario_medico.name,
+              documentTitle: 'Cópia do Prontuário Médico (Exames e Relatórios)',
+            ),
+
+            // 2. Upload Cópia do Receituário Médico
+            DocumentUploadCard(
+              documentName: DocumentType.copia_receituario_medico.name,
+              documentTitle: 'Cópia do Receituário Médico (Prescrição Médica)',
+            ),
+
+            // 3. Upload Cópia do Expediente Administrativo da Secretaria da Saúde
+            DocumentUploadCard(
+              documentName:
+                  DocumentType.expediente_administrativo_secretaria_saude.name,
+              documentTitle:
+                  'Cópia do Expediente Administrativo da Secretaria da Saúde',
+            ),
+
+            // 4. Upload Três Últimos Holerites
+            DocumentUploadCard(
+              documentName: DocumentType.tres_ultimos_holerites.name,
+              documentTitle: 'Três Últimos Holerites',
+            ),
+          ],
+        );
+    }
+
+    // Empty
+    return SizedBox.shrink();
+  }
+
   Widget _buildLawsuitDetails(DocumentSnapshot currLawsuit) {
     String name = currLawsuit['name'] ?? 'Nome não disponível';
     String createdAt = currLawsuit['createdAt'] ?? '';
@@ -401,7 +456,8 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                       documentTitle: 'Comprovante de Endereço',
                     ),
 
-                    // TODO: build cards for lawsuit specific documents
+                    // Cards de upload de documentos contextuais baseados no tipo da ação
+                    _buildUniqueDocUploadCards(type),
                   ],
                 ),
 
