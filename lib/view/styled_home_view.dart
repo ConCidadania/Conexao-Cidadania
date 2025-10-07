@@ -217,7 +217,7 @@ class _HomeViewState extends State<HomeView> {
 
   Widget _buildLawsuitsList() {
     return FutureBuilder<String>(
-      future: userCtrl.getCurrentUserType(),
+      future: userCtrl.getCurrentUserTypeFuture(),
       builder: (context, typeSnapshot) {
         if (typeSnapshot.connectionState == ConnectionState.waiting) {
           return _buildLoadingState();
@@ -502,7 +502,7 @@ class _HomeViewState extends State<HomeView> {
 
   Widget _buildFloatingActionButton(BuildContext context) {
     return FutureBuilder<String>(
-      future: userCtrl.getCurrentUserType(),
+      future: userCtrl.getCurrentUserTypeFuture(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return FloatingActionButton(

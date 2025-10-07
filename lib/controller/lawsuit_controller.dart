@@ -34,7 +34,9 @@ class LawsuitController extends ChangeNotifier {
     final userId = userCtrl.getCurrentUserId();
 
     try {
-      final String path = 'files/users/$userId/docs/$documentName';
+      // Usamos documentName aqui para padronização do nome do arquivo
+      final String path =
+          'files/users/$userId/lawsuits/$_currentLawsuitId/docs/$documentName';
       final Reference ref = _storage.ref().child(path);
 
       final SettableMetadata metadata = SettableMetadata(
@@ -118,6 +120,14 @@ class LawsuitController extends ChangeNotifier {
         lawsuits.doc(_currentLawsuitId).get();
 
     return result;
+  }
+
+  Future<String> getCurrentLawsuitOwnerId() async {
+    DocumentSnapshot snapshot =
+        await _firestore.collection('lawsuits').doc(_currentLawsuitId).get();
+
+    String ownerId = snapshot.get('ownerId') as String;
+    return ownerId;
   }
 }
 

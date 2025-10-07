@@ -64,7 +64,7 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
 
     // Recupera a url de download se existir
     final String storePath =
-        'files/users/${userCtrl.getCurrentUserId()}/docs/${widget.documentName}';
+        'files/users/${userCtrl.getCurrentUserType() == 'USER' ? userCtrl.getCurrentUserId() : await lawsuitCtrl.getCurrentLawsuitOwnerId()}/lawsuits/${lawsuitCtrl.currentLawsuitId}/docs/${widget.documentName}';
     final String? downloadUrl =
         await lawsuitCtrl.getDocumentDownloadURL(storePath);
 

@@ -160,7 +160,7 @@ class UserController extends ChangeNotifier {
   }
 
   // TODO: Remove Future and FutureBuilder
-  Future<String> getCurrentUserType() async {
+  Future<String> getCurrentUserTypeFuture() async {
     /*var userType = 'USER';
     await _firestore
         .collection('users')
@@ -172,6 +172,10 @@ class UserController extends ChangeNotifier {
 
     return userType;*/
 
+    return _currentUser.type;
+  }
+
+  String getCurrentUserType() {
     return _currentUser.type;
   }
 

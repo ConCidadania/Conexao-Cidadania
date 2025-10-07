@@ -110,7 +110,7 @@ class _HomeViewState extends State<HomeView> {
           ),
           Expanded(
             child: FutureBuilder<String>(
-              future: userCtrl.getCurrentUserType(),
+              future: userCtrl.getCurrentUserTypeFuture(),
               builder: (context, typeSnapshot) {
                 if (typeSnapshot.connectionState == ConnectionState.waiting) {
                   return Center(
@@ -186,7 +186,7 @@ class _HomeViewState extends State<HomeView> {
 
   Widget _buildFloatingActionButton(BuildContext context) {
     return FutureBuilder<String>(
-      future: userCtrl.getCurrentUserType(),
+      future: userCtrl.getCurrentUserTypeFuture(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return FloatingActionButton(
