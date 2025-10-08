@@ -26,6 +26,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     }
   }
 
+  // ignore: unused_element
   String _getRelativeDate(String dateString) {
     try {
       DateTime date = DateTime.parse(dateString);
@@ -329,6 +330,13 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     String createdAt = currLawsuit['createdAt'] ?? '';
     String type = currLawsuit['type'] ?? '';
 
+    String ownerFirstName = currLawsuit['ownerFirstName'] ?? '';
+    String ownerLastName = currLawsuit['ownerLastName'] ?? '';
+    String ownerName = '$ownerFirstName $ownerLastName';
+    String ownerEmail = currLawsuit['ownerEmail'] ?? 'Email não disponínel';
+    String ownerPhoneNumber =
+        currLawsuit['ownerPhoneNumber'] ?? 'Telefone não disponínel';
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -417,7 +425,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
               children: [
                 // Date Information Card
                 _buildInfoCard(
-                  title: "Informações de Data",
+                  title: "Informações Gerais",
                   icon: Icons.calendar_today,
                   color: AppColors.yellowColor,
                   children: [
@@ -426,11 +434,23 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                       _formatDate(createdAt),
                       Icons.event,
                     ),
-                    SizedBox(height: 12),
+                    SizedBox(height: 10),
                     _buildInfoRow(
-                      "Tempo Decorrido",
-                      _getRelativeDate(createdAt),
-                      Icons.schedule,
+                      "Aberto por",
+                      ownerName,
+                      Icons.account_circle,
+                    ),
+                    SizedBox(height: 10),
+                    _buildInfoRow(
+                      "Email",
+                      ownerEmail,
+                      Icons.email,
+                    ),
+                    SizedBox(height: 10),
+                    _buildInfoRow(
+                      "Telefone",
+                      ownerPhoneNumber,
+                      Icons.phone,
                     ),
                   ],
                 ),

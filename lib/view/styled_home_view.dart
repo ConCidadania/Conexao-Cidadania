@@ -229,7 +229,7 @@ class _HomeViewState extends State<HomeView> {
         if (userType == "USER") {
           lawsuitStream = lawsuitCtrl.fetchUserLawsuits("ownerId");
         } else {
-          lawsuitStream = lawsuitCtrl.fetchAllLawsuits("ownerId");
+          lawsuitStream = lawsuitCtrl.fetchAllLawsuits("ownerFirstName");
         }
 
         return StreamBuilder<QuerySnapshot>(
@@ -248,9 +248,21 @@ class _HomeViewState extends State<HomeView> {
             final lawsuits = streamSnapshot.data!.docs
                 .map((doc) => Lawsuit.fromFirestore(doc))
                 .toList();
-            final filteredLawsuits = lawsuits.where((lawsuit) {
-              return lawsuit.name.toLowerCase().contains(_searchQuery);
-            }).toList();
+
+            final List<Lawsuit> filteredLawsuits;
+            if (userType == 'USER') {
+              // Usuários podem pesquisar pelo nome da ação
+              filteredLawsuits = lawsuits.where((lawsuit) {
+                return lawsuit.name.toLowerCase().contains(_searchQuery);
+              }).toList();
+            } else {
+              // Advogados podem pesquisar pelo nome do dono da ação
+              filteredLawsuits = lawsuits.where((lawsuit) {
+                return lawsuit.ownerFirstName
+                    .toLowerCase()
+                    .contains(_searchQuery);
+              }).toList();
+            }
 
             if (filteredLawsuits.isEmpty && _searchQuery.isNotEmpty) {
               return _buildNoSearchResultsState();
@@ -261,8 +273,7 @@ class _HomeViewState extends State<HomeView> {
               itemCount: filteredLawsuits.length,
               itemBuilder: (context, index) {
                 final lawsuit = filteredLawsuits[index];
-                return _buildLawsuitCard(
-                    lawsuit);
+                return _buildLawsuitCard(lawsuit);
               },
             );
           },
@@ -345,6 +356,24 @@ class _HomeViewState extends State<HomeView> {
                           SizedBox(width: 4),
                           Text(
                             "Aberto em: ${_formatDate(lawsuit.createdAt)}",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.mediumGrey,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.account_circle_outlined,
+                            size: 14,
+                            color: AppColors.mediumGrey,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            "Aberto por: ${lawsuit.ownerFirstName} ${lawsuit.ownerLastName}",
                             style: TextStyle(
                               fontSize: 14,
                               color: AppColors.mediumGrey,
