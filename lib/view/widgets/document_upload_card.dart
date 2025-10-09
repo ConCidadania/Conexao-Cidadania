@@ -194,8 +194,10 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
               ),
 
               // Ações (Botões) - Seleção e Upload
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                spacing: 10.0,
+                runSpacing: 8.0,
                 children: [
                   TextButton.icon(
                     onPressed: _pickFile,
@@ -208,8 +210,6 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
                       foregroundColor: AppColors.mainGreen,
                     ),
                   ),
-
-                  SizedBox(width: 10),
 
                   // Botão Upload
                   ElevatedButton.icon(

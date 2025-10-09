@@ -476,6 +476,12 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                       documentTitle: 'Comprovante de Endereço',
                     ),
 
+                    // 3. Upload da Procuração Assinada
+                    DocumentUploadCard(
+                      documentName: DocumentType.procuracao_assinada.name,
+                      documentTitle: 'Procuração (Preenchida e Assinada)',
+                    ),
+
                     // Cards de upload de documentos contextuais baseados no tipo da ação
                     _buildUniqueDocUploadCards(type),
                   ],

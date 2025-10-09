@@ -15,6 +15,7 @@ enum DocumentType {
   // Em comum
   documento_identidade,
   comprovante_endereco,
+  procuracao_assinada,
   // Vaga em creche pública
   protocolo_inscricao_creche,
   documento_identidade_crianca,
