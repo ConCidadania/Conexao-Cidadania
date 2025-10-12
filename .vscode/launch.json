@@ -1,0 +1,29 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "con_cidadania",
+            "request": "launch",
+            "type": "dart",
+            // TEMP
+            "args": [
+                "--web-browser-flag=--disable-web-security"
+            ]
+        },
+        {
+            "name": "con_cidadania (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+        },
+        {
+            "name": "con_cidadania (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
+        }
+    ]
+}

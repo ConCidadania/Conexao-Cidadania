@@ -35,6 +35,8 @@ class Lawsuit {
   String ownerLastName;
   String ownerPhoneNumber;
   String ownerEmail;
+  String judicialProcessNumber;
+  String status;
 
   String createdAt;
 
@@ -47,7 +49,9 @@ class Lawsuit {
       required this.ownerLastName,
       required this.ownerPhoneNumber,
       required this.ownerEmail,
-      required this.createdAt});
+      required this.createdAt,
+      required this.judicialProcessNumber,
+      required this.status});
 
   factory Lawsuit.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
@@ -60,6 +64,8 @@ class Lawsuit {
         ownerLastName: data['ownerLastName'] ?? '',
         ownerPhoneNumber: data['ownerPhoneNumber'] ?? '',
         ownerEmail: data['ownerEmail'] ?? '',
+        judicialProcessNumber: data['judicialProcessNumber'] ?? '',
+        status: data['status'] ?? '',
         createdAt: data['createdAt'] ?? formatDate(DateTime.now()));
   }
 
@@ -72,6 +78,8 @@ class Lawsuit {
       'ownerLastName': ownerLastName,
       'ownerPhoneNumber': ownerPhoneNumber,
       'ownerEmail': ownerEmail,
+      'judicialProcessNumber': judicialProcessNumber,
+      'status': status,
       'createdAt': createdAt,
     };
   }

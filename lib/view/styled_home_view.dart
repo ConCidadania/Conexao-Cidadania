@@ -651,6 +651,8 @@ class _HomeViewState extends State<HomeView> {
                         ownerLastName: user.lastName,
                         ownerPhoneNumber: user.phoneNumber,
                         ownerEmail: user.email,
+                        judicialProcessNumber: '',
+                        status: 'Inicial',
                         createdAt: formatDate(DateTime.now()),
                       );
                       lawsuitCtrl.addLawsuit(context, newLawsuit);

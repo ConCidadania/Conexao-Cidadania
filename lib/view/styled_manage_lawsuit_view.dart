@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:con_cidadania/controller/lawsuit_controller.dart';
 import 'package:con_cidadania/model/lawsuit_model.dart';
 import 'package:con_cidadania/view/widgets/document_upload_card.dart';
+import 'package:con_cidadania/view/widgets/lawsuit_timeline_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
@@ -336,6 +337,8 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     String ownerEmail = currLawsuit['ownerEmail'] ?? 'Email não disponínel';
     String ownerPhoneNumber =
         currLawsuit['ownerPhoneNumber'] ?? 'Telefone não disponínel';
+    String judicialProcessNumber = currLawsuit['judicialProcessNumber'] ?? '';
+    String status = currLawsuit['status'] ?? 'Status Indisponível';
 
     return SingleChildScrollView(
       child: Column(
@@ -497,9 +500,39 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                   children: [
                     _buildInfoRow(
                       "Status Atual",
-                      "Em Andamento",
+                      status,
                       Icons.pending_actions,
                     ),
+                  ],
+                ),
+                // Andamento Processual
+                _buildInfoCard(
+                  title: "Andamento Processual",
+                  icon: Icons.timeline, // Ícone mais apropriado
+                  color: AppColors.blueGreen,
+                  children: [
+                    // Condicional para exibir o widget de histórico apenas se houver um número de processo
+                    if (judicialProcessNumber.isNotEmpty)
+                      LawsuitTimelineWidget(
+                          numeroProcesso: judicialProcessNumber)
+                    else
+                      // Mensagem exibida caso a ação ainda não tenha um número de processo
+                      Row(
+                        children: [
+                          Icon(Icons.info_outline,
+                              color: AppColors.mediumGrey, size: 18),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              "O número do processo judicial ainda não foi atribuído a esta ação.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: AppColors.mediumGrey,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
 

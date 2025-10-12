@@ -1,6 +1,8 @@
 //--controllers----------------------------------------------------------------
+import 'package:con_cidadania/controller/datajud_lawsuit_controller.dart';
 import 'package:con_cidadania/controller/lawsuit_controller.dart';
 import 'package:con_cidadania/controller/user_controller.dart';
+import 'package:con_cidadania/view/prototype_views/datajud_view.dart';
 // --views--------------------------------------------------------------------
 
 // old views for safety
@@ -41,6 +43,7 @@ void main() async {
 
   g.registerSingleton<UserController>(UserController());
   g.registerSingleton<LawsuitController>(LawsuitController());
+  g.registerSingleton<DatajudLawsuitController>(DatajudLawsuitController());
 
   runApp(DevicePreview(enabled: true, builder: (context) => const MainApp()));
 }
@@ -64,6 +67,8 @@ class MainApp extends StatelessWidget {
         'manageUsers': (context) => const ManageUsersView(),
         'manageLawsuit': (context) => const ManageLawsuitView(),
         'home': (context) => const HomeView(),
+        // TESTE
+        'datajud': (context) => const DetalhesAcaoScreen(numeroProcesso: "00008323520184013202"),
       },
     );
   }
