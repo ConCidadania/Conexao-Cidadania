@@ -271,7 +271,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     );
   }
 
-  Widget _buildUniqueDocUploadCards(String lawsuitType) {
+  Widget _buildUniqueDocUploadCards(String lawsuitType, String lawsuitStatus) {
     switch (lawsuitType) {
       case 'VAGA_CRECHE_PUBLICA':
         return Column(
@@ -280,6 +280,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
             DocumentUploadCard(
               documentName: DocumentType.protocolo_inscricao_creche.name,
               documentTitle: 'Protocolo de Inscrição na Creche',
+              lawsuitStatus: lawsuitStatus,
             ),
 
             // 2. Upload Documento Pessoal da Criança
@@ -287,6 +288,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
               documentName: DocumentType.documento_identidade_crianca.name,
               documentTitle:
                   'Documento Pessoal da Criança (Cetidão de Nascimento, RG)',
+              lawsuitStatus: lawsuitStatus,
             ),
           ],
         );
@@ -297,12 +299,14 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
             DocumentUploadCard(
               documentName: DocumentType.copia_prontuario_medico.name,
               documentTitle: 'Cópia do Prontuário Médico (Exames e Relatórios)',
+              lawsuitStatus: lawsuitStatus,
             ),
 
             // 2. Upload Cópia do Receituário Médico
             DocumentUploadCard(
               documentName: DocumentType.copia_receituario_medico.name,
               documentTitle: 'Cópia do Receituário Médico (Prescrição Médica)',
+              lawsuitStatus: lawsuitStatus,
             ),
 
             // 3. Upload Cópia do Expediente Administrativo da Secretaria da Saúde
@@ -311,12 +315,14 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                   DocumentType.expediente_administrativo_secretaria_saude.name,
               documentTitle:
                   'Cópia do Expediente Administrativo da Secretaria da Saúde',
+              lawsuitStatus: lawsuitStatus,
             ),
 
             // 4. Upload Três Últimos Holerites
             DocumentUploadCard(
               documentName: DocumentType.tres_ultimos_holerites.name,
               documentTitle: 'Três Últimos Holerites',
+              lawsuitStatus: lawsuitStatus,
             ),
           ],
         );
@@ -471,22 +477,25 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                       documentName: DocumentType.documento_identidade.name,
                       documentTitle:
                           'Documento de Identidade (RG, CNH, Certidão)',
+                      lawsuitStatus: status,
                     ),
 
                     // 2. Upload de Comprovante de Endereço
                     DocumentUploadCard(
                       documentName: DocumentType.comprovante_endereco.name,
                       documentTitle: 'Comprovante de Endereço',
+                      lawsuitStatus: status,
                     ),
 
                     // 3. Upload da Procuração Assinada
                     DocumentUploadCard(
                       documentName: DocumentType.procuracao_assinada.name,
                       documentTitle: 'Procuração (Preenchida e Assinada)',
+                      lawsuitStatus: status,
                     ),
 
                     // Cards de upload de documentos contextuais baseados no tipo da ação
-                    _buildUniqueDocUploadCards(type),
+                    _buildUniqueDocUploadCards(type, status),
                   ],
                 ),
 
@@ -769,8 +778,8 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.delete, color: AppColors.redColor),
-                title: Text("Excluir Ação"),
+                leading: Icon(Icons.cancel, color: AppColors.redColor),
+                title: Text("Encerrar Ação"),
                 onTap: () {
                   Navigator.pop(context);
                   _showDeleteConfirmation();
@@ -833,7 +842,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
             borderRadius: BorderRadius.circular(16),
           ),
           title: Text(
-            "Excluir Ação",
+            "Encerrar Ação",
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -841,7 +850,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
             ),
           ),
           content: Text(
-            "Tem certeza que deseja excluir esta ação judicial? Esta ação não pode ser desfeita.",
+            "Tem certeza que deseja encerrar esta ação judicial? Esta ação não pode ser desfeita.",
             style: TextStyle(
               fontSize: 16,
               color: AppColors.mediumGrey,
@@ -861,7 +870,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _showComingSoonDialog("Excluir Ação");
+                ctrl.updateLawsuitStatus("Encerrada");
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.redColor,
@@ -870,7 +879,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                 ),
               ),
               child: Text(
-                "Excluir",
+                "Encerrar",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,

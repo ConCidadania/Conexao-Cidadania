@@ -10,11 +10,13 @@ import 'package:con_cidadania/utils/colors.dart';
 class DocumentUploadCard extends StatefulWidget {
   final String documentName;
   final String documentTitle;
+  final String lawsuitStatus;
 
   const DocumentUploadCard({
     super.key,
     required this.documentName,
     required this.documentTitle,
+    required this.lawsuitStatus,
   });
 
   @override
@@ -200,7 +202,8 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
                 runSpacing: 8.0,
                 children: [
                   TextButton.icon(
-                    onPressed: _pickFile,
+                    onPressed:
+                        widget.lawsuitStatus != 'Encerrada' ? _pickFile : null,
                     icon: Icon(Icons.folder_open,
                         size: 18, color: AppColors.mainGreen),
                     label: Text(_selectedFileBytes != null

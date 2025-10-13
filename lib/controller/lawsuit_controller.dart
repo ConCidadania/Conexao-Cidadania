@@ -131,12 +131,19 @@ class LawsuitController extends ChangeNotifier {
     return ownerId;
   }
 
-  Future<bool> userHasLawsuits() async {
-    var result = await _firestore
+  void updateLawsuitStatus(String newStatus) {
+    _firestore
         .collection('lawsuits')
-        .where('ownerId', isEqualTo: userCtrl.getCurrentUserId()).get();
+        .doc(_currentLawsuitId)
+        .update({'status': newStatus});
+  }
 
-    return result.docs.isEmpty ? false : true;
+  Future<String> getCurrentLawsuitStatus() async {
+    DocumentSnapshot snapshot =
+        await _firestore.collection('lawsuits').doc(_currentLawsuitId).get();
+
+    String status = snapshot.get('status') as String;
+    return status;
   }
 }
 
