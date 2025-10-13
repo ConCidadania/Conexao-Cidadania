@@ -14,7 +14,7 @@ class DetalhesAcaoScreen extends StatefulWidget {
 }
 
 class _DetalhesAcaoScreenState extends State<DetalhesAcaoScreen> {
-  late Future<ProcessoDatajud?> _processoFuture;
+  late Future<DatajudLawsuit?> _processoFuture;
   final DatajudService _datajudService = DatajudService();
 
   @override
@@ -64,7 +64,7 @@ class _DetalhesAcaoScreenState extends State<DetalhesAcaoScreen> {
             // Expanded garante que o FutureBuilder ocupe o espaço restante,
             // permitindo que a ListView interna seja rolável.
             Expanded(
-              child: FutureBuilder<ProcessoDatajud?>(
+              child: FutureBuilder<DatajudLawsuit?>(
                 future: _processoFuture,
                 builder: (context, snapshot) {
                   // Enquanto os dados estão carregando

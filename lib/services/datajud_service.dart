@@ -6,9 +6,10 @@ class DatajudService {
   //final String _baseUrl = "https://api-publica.datajud.cnj.jus.br/api_publica/_search";
   final String _baseUrl =
       "https://api-publica.datajud.cnj.jus.br/api_publica_trf1/_search";
-  final String apiKey = 'cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==';
+  final String apiKey =
+      'cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==';
 
-  Future<ProcessoDatajud?> consultarProcesso(String numeroProcesso) async {
+  Future<DatajudLawsuit?> consultarProcesso(String numeroProcesso) async {
     try {
       final http.Response response = await http.post(
         Uri.parse(_baseUrl),
@@ -29,7 +30,7 @@ class DatajudService {
         // Adapte o parsing conforme a estrutura exata da resposta.
         if (responseBody['hits']['hits'].isNotEmpty) {
           final dadosProcesso = responseBody['hits']['hits'][0]['_source'];
-          return ProcessoDatajud.fromJson(dadosProcesso);
+          return DatajudLawsuit.fromJson(dadosProcesso);
         }
         return null;
       } else {

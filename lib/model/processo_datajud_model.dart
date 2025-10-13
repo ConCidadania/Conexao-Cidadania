@@ -1,5 +1,5 @@
 // lib/source/models/processo_datajud_model.dart
-class ProcessoDatajud {
+class DatajudLawsuit {
   final String? classe;
   final String? area;
   final String? assunto;
@@ -7,7 +7,7 @@ class ProcessoDatajud {
   final String? orgaoJulgador;
   final List<Movimento> movimentos;
 
-  ProcessoDatajud({
+  DatajudLawsuit({
     this.classe,
     this.area,
     this.assunto,
@@ -16,16 +16,18 @@ class ProcessoDatajud {
     required this.movimentos,
   });
 
-  factory ProcessoDatajud.fromJson(Map<String, dynamic> json) {
+  factory DatajudLawsuit.fromJson(Map<String, dynamic> json) {
     // A estrutura do JSON de resposta deve ser analisada na documentação do Datajud
     // para um parsing preciso. Este é um exemplo.
     var movimentosList = json['movimentos'] as List? ?? [];
-    List<Movimento> movimentos = movimentosList.map((i) => Movimento.fromJson(i)).toList();
+    List<Movimento> movimentos =
+        movimentosList.map((i) => Movimento.fromJson(i)).toList();
 
-    return ProcessoDatajud(
+    return DatajudLawsuit(
       classe: json['classe']?['nome'],
       area: json['area'],
-      assunto: json['assuntos']?[0]?['nome'], // Exemplo, pegando o primeiro assunto
+      assunto: json['assuntos']?[0]
+          ?['nome'], // Exemplo, pegando o primeiro assunto
       dataAjuizamento: json['dataAjuizamento'],
       orgaoJulgador: json['orgaoJulgador']?['nome'],
       movimentos: movimentos,
@@ -33,7 +35,8 @@ class ProcessoDatajud {
   }
 
   // O último movimento geralmente indica o status mais recente.
-  String? get ultimoStatus => movimentos.isNotEmpty ? movimentos.first.nome : "Status não disponível";
+  String? get ultimoStatus =>
+      movimentos.isNotEmpty ? movimentos.first.nome : "Status não disponível";
 }
 
 class Movimento {
@@ -47,7 +50,9 @@ class Movimento {
     return Movimento(
       data: json['dataHora'],
       nome: json['nome'] ?? 'Dado Indisponível',
-      descricao: json['movimentoNacional']?['descricao'] ?? json['complemento'] ?? 'Movimento não descrito',
+      descricao: json['movimentoNacional']?['descricao'] ??
+          json['complemento'] ??
+          'Movimento não descrito',
     );
   }
 }

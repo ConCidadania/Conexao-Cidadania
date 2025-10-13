@@ -12,7 +12,7 @@ class DatajudLawsuitController extends ChangeNotifier {
 
   void _updateTimeline(String numeroProcesso) async {
     // Consultar Datajud Service
-    ProcessoDatajud? result =
+    DatajudLawsuit? result =
         await _datajudService.consultarProcesso(numeroProcesso);
     // Enviar dados para o firestore
     CollectionReference lawsuitTimeline = _firestore
@@ -39,7 +39,7 @@ class DatajudLawsuitController extends ChangeNotifier {
         .collection('lawsuits')
         .doc(lawsuitCtrl.currentLawsuitId)
         .collection('historico')
-        .orderBy("date");
+        .orderBy("date", descending: true);
 
     return result.snapshots();
   }
