@@ -1,5 +1,5 @@
 // Em uma tela como 'lib/telas/detalhes_acao_screen.dart' (exemplo)
-import 'package:con_cidadania/model/processo_datajud_model.dart'; // Presumindo a existência deste import
+import 'package:con_cidadania/model/datajud_lawsuit_model.dart'; // Presumindo a existência deste import
 import 'package:con_cidadania/services/datajud_service.dart'; // Presumindo a existência deste import
 import 'package:flutter/material.dart';
 

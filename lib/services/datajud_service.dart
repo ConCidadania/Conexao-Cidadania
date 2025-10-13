@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:con_cidadania/model/processo_datajud_model.dart';
+import 'package:con_cidadania/model/datajud_lawsuit_model.dart';
 
 class DatajudService {
   //final String _baseUrl = "https://api-publica.datajud.cnj.jus.br/api_publica/_search";

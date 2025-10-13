@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:con_cidadania/controller/lawsuit_controller.dart';
-import 'package:con_cidadania/model/processo_datajud_model.dart';
+import 'package:con_cidadania/model/datajud_lawsuit_model.dart';
 import 'package:con_cidadania/services/datajud_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
