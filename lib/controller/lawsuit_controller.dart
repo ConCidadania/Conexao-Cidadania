@@ -130,6 +130,14 @@ class LawsuitController extends ChangeNotifier {
     String ownerId = snapshot.get('ownerId') as String;
     return ownerId;
   }
+
+  Future<bool> userHasLawsuits() async {
+    var result = await _firestore
+        .collection('lawsuits')
+        .where('ownerId', isEqualTo: userCtrl.getCurrentUserId()).get();
+
+    return result.docs.isEmpty ? false : true;
+  }
 }
 
 String? getContentType(String fileName) {

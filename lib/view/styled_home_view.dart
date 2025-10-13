@@ -22,6 +22,8 @@ class _HomeViewState extends State<HomeView> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
+  bool shouldBuildFloatingActionButton = false;
+
   final Map<LawsuitType, Map<String, dynamic>> lawsuitOptions = {
     LawsuitType.REMEDIO_ALTO_CUSTO: {
       'name': 'Remédio de Alto Custo',
@@ -102,7 +104,9 @@ class _HomeViewState extends State<HomeView> {
           ),
         ],
       ),
-      floatingActionButton: _buildFloatingActionButton(context),
+      floatingActionButton: shouldBuildFloatingActionButton
+          ? _buildFloatingActionButton(context)
+          : SizedBox.shrink(),
     );
   }
 
@@ -242,8 +246,27 @@ class _HomeViewState extends State<HomeView> {
               return _buildErrorState(streamSnapshot.error.toString());
             }
             if (!streamSnapshot.hasData || streamSnapshot.data!.docs.isEmpty) {
+              // Garante que o estado seja atualizado de forma segura após a construção do frame
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (shouldBuildFloatingActionButton) {
+                  // Apenas atualiza se o estado for diferente
+                  setState(() {
+                    shouldBuildFloatingActionButton = false;
+                  });
+                }
+              });
               return _buildEmptyState();
             }
+
+            // Construir Floating Action Button
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!shouldBuildFloatingActionButton) {
+                // Apenas atualiza se o estado for diferente
+                setState(() {
+                  shouldBuildFloatingActionButton = true;
+                });
+              }
+            });
 
             final lawsuits = streamSnapshot.data!.docs
                 .map((doc) => Lawsuit.fromFirestore(doc))
@@ -458,38 +481,9 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.assignment_outlined,
-              size: 64,
-              color: AppColors.mediumGrey,
-            ),
-            SizedBox(height: 16),
-            Text(
-              "Nenhuma ação encontrada",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: AppColors.blackColor,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              "Toque no botão + para criar sua primeira ação judicial",
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.mediumGrey,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 0), // Adiciona padding
+      child: _buildGuidedCreationWidget(), // Chama o novo widget
     );
   }
 
@@ -526,6 +520,149 @@ class _HomeViewState extends State<HomeView> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildGuidedCreationWidget() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Cabeçalho textual para guiar o usuário
+        Icon(
+          Icons.assignment_outlined,
+          size: 64,
+          color: AppColors.mediumGrey,
+        ),
+        SizedBox(height: 16),
+        Text(
+          "Bem Vindo! Vamos Começar?",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: AppColors.blackColor,
+          ),
+        ),
+        SizedBox(height: 8),
+        Text(
+          "Selecione um tipo abaixo para criar sua primeira ação judicial:",
+          style: TextStyle(
+            fontSize: 14,
+            color: AppColors.mediumGrey,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 24),
+
+        // ListView com os tipos de ações
+        Expanded(
+          child: ListView.builder(
+            itemCount: lawsuitOptions.length,
+            itemBuilder: (context, index) {
+              final lawsuitType = lawsuitOptions.keys.elementAt(index);
+              final data = lawsuitOptions[lawsuitType]!;
+
+              // Card estilizado para cada tipo de ação
+              return Container(
+                margin: EdgeInsets.only(bottom: 12),
+                child: Card(
+                  elevation: 4,
+                  shadowColor: Colors.black.withOpacity(0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () async {
+                      // Lógica para adicionar a ação, reutilizada do _showLawsuitTypeDialog
+                      final userUid = userCtrl.getCurrentUserId();
+                      final user = userCtrl.getCurrentUser();
+
+                      // Garante que os dados do usuário estão disponíveis
+                      if (user == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                "Erro ao obter dados do usuário. Tente novamente."),
+                            backgroundColor: AppColors.redColor,
+                          ),
+                        );
+                        return;
+                      }
+
+                      final newLawsuit = Lawsuit(
+                        name: data['name'],
+                        type: lawsuitType.name,
+                        ownerId: userUid,
+                        ownerFirstName: user.firstName,
+                        ownerLastName: user.lastName,
+                        ownerPhoneNumber: user.phoneNumber,
+                        ownerEmail: user.email,
+                        judicialProcessNumber: '',
+                        status: 'Inicial',
+                        createdAt:
+                            formatDate(DateTime.now()), // Função do time.dart
+                      );
+                      lawsuitCtrl.addLawsuit(context, newLawsuit);
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          // Container do Ícone
+                          Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: (data['color'] as Color).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              data['icon'],
+                              color: data['color'],
+                              size: 28,
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          // Conteúdo de Texto
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  data['name'],
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.blackColor,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  "Clique aqui para iniciar",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: AppColors.mediumGrey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Ícone de seta
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                            color: AppColors.mediumGrey,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
