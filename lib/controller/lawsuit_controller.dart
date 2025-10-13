@@ -31,12 +31,13 @@ class LawsuitController extends ChangeNotifier {
 
   Future<String?> uploadDocument(
       String documentName, String fileName, Uint8List fileData) async {
+    final userType = userCtrl.getCurrentUserType();
     final userId = userCtrl.getCurrentUserId();
 
     try {
       // Usamos documentName aqui para padronização do nome do arquivo
       final String path =
-          'files/users/$userId/lawsuits/$_currentLawsuitId/docs/$documentName';
+          'files/users/${userType == 'USER' ? userId : await getCurrentLawsuitOwnerId()}/lawsuits/$_currentLawsuitId/docs/$documentName';
       final Reference ref = _storage.ref().child(path);
 
       final SettableMetadata metadata = SettableMetadata(
