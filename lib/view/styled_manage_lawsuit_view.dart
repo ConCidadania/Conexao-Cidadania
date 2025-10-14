@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:con_cidadania/controller/lawsuit_controller.dart';
+import 'package:con_cidadania/controller/user_controller.dart';
 import 'package:con_cidadania/model/lawsuit_model.dart';
 import 'package:con_cidadania/view/widgets/document_upload_card.dart';
 import 'package:con_cidadania/view/widgets/lawsuit_timeline_widget.dart';
@@ -17,6 +18,7 @@ class ManageLawsuitView extends StatefulWidget {
 
 class _ManageLawsuitViewState extends State<ManageLawsuitView> {
   final ctrl = GetIt.I.get<LawsuitController>();
+  final userCtrl = GetIt.I.get<UserController>();
 
   String _formatDate(String dateString) {
     try {
@@ -731,7 +733,72 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     );
   }
 
+//  void _showOptionsMenu() {
+//    showModalBottomSheet(
+//      context: context,
+//      shape: RoundedRectangleBorder(
+//        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+//      ),
+//      builder: (context) {
+//        return Container(
+//          padding: EdgeInsets.all(16),
+//          child: Column(
+//            mainAxisSize: MainAxisSize.min,
+//            children: [
+//              Container(
+//                width: 40,
+//                height: 4,
+//                decoration: BoxDecoration(
+//                  color: AppColors.mediumGrey,
+//                  borderRadius: BorderRadius.circular(2),
+//                ),
+//              ),
+//              SizedBox(height: 16),
+//              Text(
+//                "Opções",
+//                style: TextStyle(
+//                  fontSize: 18,
+//                  fontWeight: FontWeight.w600,
+//                  color: AppColors.blackColor,
+//                ),
+//              ),
+//              SizedBox(height: 16),
+//              ListTile(
+//                leading: Icon(Icons.edit, color: AppColors.mainGreen),
+//                title: Text("Registrar Número de Processo"),
+//                onTap: () {
+//                  Navigator.pop(context);
+//                  _showComingSoonDialog("Registrar Número de Processo");
+//                },
+//              ),
+//              ListTile(
+//                leading: Icon(Icons.list_sharp, color: AppColors.blueGreen),
+//                title: Text("Preencher Procuração"),
+//                onTap: () {
+//                  Navigator.pop(context);
+//                  _showComingSoonDialog("Preencher Procuração");
+//                },
+//              ),
+//              ListTile(
+//                leading: Icon(Icons.cancel, color: AppColors.redColor),
+//                title: Text("Encerrar Ação"),
+//                onTap: () {
+//                  Navigator.pop(context);
+//                  _showDeleteConfirmation();
+//                },
+//              ),
+//              SizedBox(height: 16),
+//            ],
+//          ),
+//        );
+//      },
+//    );
+//  }
+
   void _showOptionsMenu() {
+    // Obtém o tipo do usuário logado a partir do controller
+    final String userType = userCtrl.getCurrentUserType();
+
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -761,22 +828,28 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                 ),
               ),
               SizedBox(height: 16),
-              ListTile(
-                leading: Icon(Icons.edit, color: AppColors.mainGreen),
-                title: Text("Editar Ação"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showComingSoonDialog("Editar Ação");
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.share, color: AppColors.blueGreen),
-                title: Text("Compartilhar"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showComingSoonDialog("Compartilhar");
-                },
-              ),
+
+              // Condicional para exibir opções apenas para LAWYER ou ADMIN
+              if (userType == 'LAWYER' || userType == 'ADMIN') ...[
+                ListTile(
+                  leading: Icon(Icons.edit, color: AppColors.mainGreen),
+                  title: Text("Registrar Número de Processo"),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showRegisterProcessNumberDialog();
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.list_sharp, color: AppColors.blueGreen),
+                  title: Text("Preencher Procuração"),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showComingSoonDialog("Preencher Procuração");
+                  },
+                ),
+              ],
+
+              // Opções visíveis para todos os usuários
               ListTile(
                 leading: Icon(Icons.cancel, color: AppColors.redColor),
                 title: Text("Encerrar Ação"),
@@ -788,6 +861,98 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
               SizedBox(height: 16),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  void _showRegisterProcessNumberDialog() {
+    final TextEditingController _processNumberController =
+        TextEditingController();
+    final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            "Registrar Processo",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.blackColor,
+            ),
+          ),
+          content: Form(
+            key: _formKey,
+            child: TextFormField(
+              controller: _processNumberController,
+              decoration: InputDecoration(
+                labelText: "Número do Processo Judicial",
+                hintText: "0000000-00.0000.0.00.0000",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.mainGreen),
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return "Por favor, insira o número do processo.";
+                }
+                return null;
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                "Cancelar",
+                style: TextStyle(
+                  color: AppColors.mediumGrey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Valida o formulário
+                if (_formKey.currentState!.validate()) {
+                  final numeroProcesso = _processNumberController.text;
+
+                  // Chama o controller para atualizar o número do processo
+                  ctrl.updateLawsuitJudicialProcessNumber(numeroProcesso);
+                  // Atualiza também o status da ação
+                  ctrl.updateLawsuitStatus("Em Andamento");
+
+                  // Fecha o dialog
+                  Navigator.of(context).pop();
+
+                  // Atualiza a tela para refletir a mudança
+                  setState(() {});
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.mainGreen,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                "Salvar",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -869,8 +1034,9 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).pop();
                 ctrl.updateLawsuitStatus("Encerrada");
+                Navigator.of(context).pop();
+                setState(() {});
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.redColor,

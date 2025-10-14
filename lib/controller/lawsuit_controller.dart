@@ -145,6 +145,13 @@ class LawsuitController extends ChangeNotifier {
     String status = snapshot.get('status') as String;
     return status;
   }
+
+  void updateLawsuitJudicialProcessNumber(String numeroProcesso) {
+    _firestore
+        .collection('lawsuits')
+        .doc(_currentLawsuitId)
+        .update({'judicialProcessNumber': numeroProcesso});
+  }
 }
 
 String? getContentType(String fileName) {

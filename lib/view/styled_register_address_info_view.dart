@@ -356,7 +356,7 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
         controller: _streetController,
         style: TextStyle(fontSize: 16, color: AppColors.blackColor),
         decoration: InputDecoration(
-          labelText: "Logradouro",
+          labelText: "Endereço",
           labelStyle: TextStyle(color: AppColors.mediumGrey),
           prefixIcon: Icon(Icons.location_on, color: AppColors.mainGreen),
           hintText: "Rua, Avenida, etc.",
@@ -379,7 +379,7 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return "Informe o logradouro";
+            return "Informe o endereço";
           }
           return null;
         },
