@@ -32,7 +32,7 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
   String neighborhood = "";
   String city = "";
   String state = "";
-  String country = "";
+  String country = "Brasil"; // Default country
   String postalCode = "";
   bool _isLoading = false;
 
@@ -49,9 +49,7 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
   }
 
   String _formatCEP(String cep) {
-    // Remove all non-digits
     String digits = cep.replaceAll(RegExp(r'\D'), '');
-
     if (digits.length == 8) {
       return "${digits.substring(0, 5)}-${digits.substring(5)}";
     }
@@ -62,94 +60,159 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.lightGrey,
-      appBar: _buildAppBar(),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.mainGreen.withOpacity(0.1),
-              AppColors.lightGrey,
-            ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Ponto de quebra: 800 pixels
+          if (constraints.maxWidth > 800) {
+            return _buildDesktopLayout();
+          } else {
+            return _buildMobileLayout();
+          }
+        },
+      ),
+    );
+  }
+
+  // Layout para telas largas (Desktop)
+  Widget _buildDesktopLayout() {
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: _buildBrandingPanel(),
+        ),
+        Expanded(
+          flex: 3,
+          child: Center(
+            child: _buildRegistrationForm(),
           ),
         ),
-        child: SafeArea(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                // Progress Indicator
-                _buildProgressIndicator(),
+      ],
+    );
+  }
 
-                // Form Content
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SizedBox(height: 24.0),
+  // Layout para telas estreitas (Mobile)
+  Widget _buildMobileLayout() {
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: _buildRegistrationForm(),
+    );
+  }
 
-                        // Title Section
-                        _buildTitleSection(),
-
-                        SizedBox(height: 32.0),
-
-                        // Form Fields
-                        _buildCEPField(),
-                        SizedBox(height: 16.0),
-
-                        _buildStreetField(),
-                        SizedBox(height: 16.0),
-
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: _buildNumberField(),
-                            ),
-                            SizedBox(width: 12.0),
-                            Expanded(
-                              flex: 3,
-                              child: _buildComplementField(),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 16.0),
-
-                        _buildNeighborhoodField(),
-                        SizedBox(height: 16.0),
-
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: _buildCityField(),
-                            ),
-                            SizedBox(width: 12.0),
-                            Expanded(
-                              flex: 1,
-                              child: _buildStateField(),
-                            ),
-                          ],
-                        ),
-
-                        SizedBox(height: 32.0),
-                      ],
-                    ),
-                  ),
+  // Novo Widget: Painel informativo para a versão desktop
+  Widget _buildBrandingPanel() {
+    return Container(
+      color: AppColors.mainGreen,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.home_work_outlined,
+                size: 80,
+                color: Colors.white,
+              ),
+              SizedBox(height: 24),
+              Text(
+                "Informações de Endereço",
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-
-                // Bottom Navigation
-                _buildBottomNavigation(),
-              ],
-            ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 24),
+              Text(
+                "Seu endereço é importante para a correta identificação nos processos.",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white.withOpacity(0.9),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 40),
+              _buildProgressIndicator(isDesktop: true),
+            ],
           ),
         ),
       ),
     );
   }
+
+  // O formulário original, agora extraído para um widget reutilizável
+  Widget _buildRegistrationForm() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.mainGreen.withOpacity(0.1),
+            AppColors.lightGrey,
+          ],
+        ),
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            LayoutBuilder(builder: (context, constraints) {
+              if (constraints.maxWidth <= 800) {
+                return _buildProgressIndicator();
+              }
+              return SizedBox.shrink();
+            }),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 24.0),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 500),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(height: 24.0),
+                      _buildTitleSection(),
+                      SizedBox(height: 32.0),
+                      _buildCEPField(),
+                      SizedBox(height: 16.0),
+                      _buildStreetField(),
+                      SizedBox(height: 16.0),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(flex: 2, child: _buildNumberField()),
+                          SizedBox(width: 12.0),
+                          Expanded(flex: 3, child: _buildComplementField()),
+                        ],
+                      ),
+                      SizedBox(height: 16.0),
+                      _buildNeighborhoodField(),
+                      SizedBox(height: 16.0),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(flex: 3, child: _buildCityField()),
+                          SizedBox(width: 12.0),
+                          Expanded(flex: 1, child: _buildStateField()),
+                        ],
+                      ),
+                      SizedBox(height: 32.0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            _buildBottomNavigation(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Os métodos auxiliares abaixo permanecem praticamente inalterados.
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
@@ -171,16 +234,21 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
     );
   }
 
-  Widget _buildProgressIndicator() {
+  Widget _buildProgressIndicator({bool isDesktop = false}) {
+    Color activeColor = Colors.white;
+    Color inactiveColor = Colors.white.withOpacity(0.3);
+
     return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.mainGreen,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
+      padding: isDesktop ? EdgeInsets.zero : EdgeInsets.all(16),
+      decoration: isDesktop
+          ? null
+          : BoxDecoration(
+              color: AppColors.mainGreen,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+            ),
       child: Column(
         children: [
           Text(
@@ -194,45 +262,13 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
           SizedBox(height: 12),
           Row(
             children: [
-              Expanded(
-                child: Container(
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+              Expanded(child: _buildProgressBarStep(color: activeColor)),
               SizedBox(width: 8),
-              Expanded(
-                child: Container(
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+              Expanded(child: _buildProgressBarStep(color: activeColor)),
               SizedBox(width: 8),
-              Expanded(
-                child: Container(
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+              Expanded(child: _buildProgressBarStep(color: activeColor)),
               SizedBox(width: 8),
-              Expanded(
-                child: Container(
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+              Expanded(child: _buildProgressBarStep(color: inactiveColor)),
             ],
           ),
           SizedBox(height: 8),
@@ -248,7 +284,18 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
     );
   }
 
+  Widget _buildProgressBarStep({required Color color}) {
+    return Container(
+      height: 4,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
+  }
+
   Widget _buildTitleSection() {
+    // ... (código original sem alterações)
     return Column(
       children: [
         Icon(
@@ -280,6 +327,7 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
   }
 
   Widget _buildCEPField() {
+    // ... (código original sem alterações)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -340,6 +388,7 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
   }
 
   Widget _buildStreetField() {
+    // ... (código original sem alterações)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -393,6 +442,7 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
   }
 
   Widget _buildNumberField() {
+    // ... (código original sem alterações)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -447,6 +497,7 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
   }
 
   Widget _buildComplementField() {
+    // ... (código original sem alterações)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -490,6 +541,7 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
   }
 
   Widget _buildNeighborhoodField() {
+    // ... (código original sem alterações)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -541,6 +593,7 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
   }
 
   Widget _buildCityField() {
+    // ... (código original sem alterações)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -592,6 +645,7 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
   }
 
   Widget _buildStateField() {
+    // ... (código original sem alterações)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -649,6 +703,7 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
   }
 
   Widget _buildBottomNavigation() {
+    // ... (código original sem alterações)
     return Container(
       padding: EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -729,6 +784,7 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
   }
 
   Future<void> _handleNext() async {
+    // ... (código original sem alterações)
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;

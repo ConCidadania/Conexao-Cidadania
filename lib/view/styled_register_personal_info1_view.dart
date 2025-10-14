@@ -47,8 +47,6 @@ class _RegisterPersonalInfo1ViewState extends State<RegisterPersonalInfo1View> {
 
   String _formatName(String name) {
     if (name.isEmpty) return name;
-
-    // Capitalize first letter of each word
     return name.split(' ').map((word) {
       if (word.isEmpty) return word;
       return word[0].toUpperCase() + word.substring(1).toLowerCase();
@@ -57,8 +55,6 @@ class _RegisterPersonalInfo1ViewState extends State<RegisterPersonalInfo1View> {
 
   String _formatProfession(String profession) {
     if (profession.isEmpty) return profession;
-
-    // Capitalize first letter of each word
     return profession.split(' ').map((word) {
       if (word.isEmpty) return word;
       return word[0].toUpperCase() + word.substring(1).toLowerCase();
@@ -69,70 +65,154 @@ class _RegisterPersonalInfo1ViewState extends State<RegisterPersonalInfo1View> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.lightGrey,
-      appBar: _buildAppBar(),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.mainGreen.withOpacity(0.1),
-              AppColors.lightGrey,
-            ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Ponto de quebra: 800 pixels
+          if (constraints.maxWidth > 800) {
+            return _buildDesktopLayout();
+          } else {
+            return _buildMobileLayout();
+          }
+        },
+      ),
+    );
+  }
+
+  // Layout para telas largas (Desktop)
+  Widget _buildDesktopLayout() {
+    return Row(
+      children: [
+        // Painel Esquerdo: Branding e Progresso
+        Expanded(
+          flex: 2, // Ocupa menos espaço que o formulário
+          child: _buildBrandingPanel(),
+        ),
+        // Painel Direito: Formulário de Cadastro
+        Expanded(
+          flex: 3, // Ocupa mais espaço
+          child: Center(
+            child: _buildRegistrationForm(), // Reutiliza o formulário
           ),
         ),
-        child: SafeArea(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                // Progress Indicator
-                _buildProgressIndicator(),
+      ],
+    );
+  }
 
-                // Form Content
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SizedBox(height: 24.0),
+  // Layout para telas estreitas (Mobile)
+  Widget _buildMobileLayout() {
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: _buildRegistrationForm(), // Reutiliza o formulário
+    );
+  }
 
-                        // Title Section
-                        _buildTitleSection(),
-
-                        SizedBox(height: 32.0),
-
-                        // Form Fields
-                        _buildFirstNameField(),
-                        SizedBox(height: 16.0),
-
-                        _buildLastNameField(),
-                        SizedBox(height: 16.0),
-
-                        _buildProfessionField(),
-                        SizedBox(height: 16.0),
-
-                        _buildGenderField(),
-                        SizedBox(height: 16.0),
-
-                        _buildCivilStatusField(),
-
-                        SizedBox(height: 32.0),
-                      ],
-                    ),
-                  ),
+  // Novo Widget: Painel informativo para a versão desktop
+  Widget _buildBrandingPanel() {
+    return Container(
+      color: AppColors.mainGreen,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.person_add_alt_1,
+                size: 80,
+                color: Colors.white,
+              ),
+              SizedBox(height: 24),
+              Text(
+                "Criando sua Conta",
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-
-                // Bottom Navigation
-                _buildBottomNavigation(),
-              ],
-            ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 24),
+              Text(
+                "Preencha suas informações para garantir o acesso seguro à plataforma.",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white.withOpacity(0.9),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 40),
+              // Indicador de progresso adaptado para o painel
+              _buildProgressIndicator(isDesktop: true),
+            ],
           ),
         ),
       ),
     );
   }
+
+  // O formulário original, agora extraído para um widget reutilizável
+  Widget _buildRegistrationForm() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.mainGreen.withOpacity(0.1),
+            AppColors.lightGrey,
+          ],
+        ),
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            // No mobile, o indicador fica aqui. No desktop, ele está no painel esquerdo.
+            // O LayoutBuilder nos ajuda a decidir se devemos mostrar este widget.
+            LayoutBuilder(builder: (context, constraints) {
+              if (constraints.maxWidth <= 800) {
+                return _buildProgressIndicator();
+              }
+              return SizedBox.shrink(); // Não mostra nada no desktop
+            }),
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 24.0),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 500),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(height: 24.0),
+                      _buildTitleSection(),
+                      SizedBox(height: 32.0),
+                      _buildFirstNameField(),
+                      SizedBox(height: 16.0),
+                      _buildLastNameField(),
+                      SizedBox(height: 16.0),
+                      _buildProfessionField(),
+                      SizedBox(height: 16.0),
+                      _buildGenderField(),
+                      SizedBox(height: 16.0),
+                      _buildCivilStatusField(),
+                      SizedBox(height: 32.0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Navegação inferior
+            _buildBottomNavigation(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Os métodos auxiliares abaixo permanecem praticamente inalterados.
+  // Apenas o _buildProgressIndicator recebe um parâmetro para estilização.
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
@@ -154,22 +234,30 @@ class _RegisterPersonalInfo1ViewState extends State<RegisterPersonalInfo1View> {
     );
   }
 
-  Widget _buildProgressIndicator() {
+  Widget _buildProgressIndicator({bool isDesktop = false}) {
+    Color activeColor = isDesktop ? Colors.white : Colors.white;
+    Color inactiveColor = isDesktop
+        ? Colors.white.withOpacity(0.3)
+        : Colors.white.withOpacity(0.3);
+    Color textColor = isDesktop ? Colors.white : Colors.white;
+
     return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.mainGreen,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
+      padding: isDesktop ? EdgeInsets.zero : EdgeInsets.all(16),
+      decoration: isDesktop
+          ? null // Sem decoração extra no desktop
+          : BoxDecoration(
+              color: AppColors.mainGreen,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+            ),
       child: Column(
         children: [
           Text(
             "Informações Pessoais",
             style: TextStyle(
-              color: Colors.white,
+              color: textColor,
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
@@ -178,51 +266,27 @@ class _RegisterPersonalInfo1ViewState extends State<RegisterPersonalInfo1View> {
           Row(
             children: [
               Expanded(
-                child: Container(
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+                  child: _buildProgressBarStep(
+                      isActive: true, color: activeColor)),
               SizedBox(width: 8),
               Expanded(
-                child: Container(
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+                  child: _buildProgressBarStep(
+                      isActive: false, color: inactiveColor)),
               SizedBox(width: 8),
               Expanded(
-                child: Container(
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+                  child: _buildProgressBarStep(
+                      isActive: false, color: inactiveColor)),
               SizedBox(width: 8),
               Expanded(
-                child: Container(
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+                  child: _buildProgressBarStep(
+                      isActive: false, color: inactiveColor)),
             ],
           ),
           SizedBox(height: 8),
           Text(
             "Etapa 1 de 4",
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: textColor.withOpacity(0.8),
               fontSize: 14,
             ),
           ),
@@ -231,7 +295,18 @@ class _RegisterPersonalInfo1ViewState extends State<RegisterPersonalInfo1View> {
     );
   }
 
+  Widget _buildProgressBarStep({required bool isActive, required Color color}) {
+    return Container(
+      height: 4,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
+  }
+
   Widget _buildTitleSection() {
+    // ... (código original sem alterações)
     return Column(
       children: [
         Icon(
@@ -263,6 +338,7 @@ class _RegisterPersonalInfo1ViewState extends State<RegisterPersonalInfo1View> {
   }
 
   Widget _buildFirstNameField() {
+    // ... (código original sem alterações)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -315,6 +391,7 @@ class _RegisterPersonalInfo1ViewState extends State<RegisterPersonalInfo1View> {
   }
 
   Widget _buildLastNameField() {
+    // ... (código original sem alterações)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -367,6 +444,7 @@ class _RegisterPersonalInfo1ViewState extends State<RegisterPersonalInfo1View> {
   }
 
   Widget _buildProfessionField() {
+    // ... (código original sem alterações)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -421,6 +499,7 @@ class _RegisterPersonalInfo1ViewState extends State<RegisterPersonalInfo1View> {
   }
 
   Widget _buildGenderField() {
+    // ... (código original sem alterações)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -478,6 +557,7 @@ class _RegisterPersonalInfo1ViewState extends State<RegisterPersonalInfo1View> {
   }
 
   Widget _buildCivilStatusField() {
+    // ... (código original sem alterações)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -535,6 +615,7 @@ class _RegisterPersonalInfo1ViewState extends State<RegisterPersonalInfo1View> {
   }
 
   Widget _buildBottomNavigation() {
+    // ... (código original sem alterações)
     return Container(
       padding: EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -615,6 +696,7 @@ class _RegisterPersonalInfo1ViewState extends State<RegisterPersonalInfo1View> {
   }
 
   void _handleNext() {
+    // ... (código original sem alterações)
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;

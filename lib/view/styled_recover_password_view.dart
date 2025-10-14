@@ -31,6 +31,43 @@ class _RecoverPasswordViewState extends State<RecoverPasswordView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.lightGrey,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Ponto de quebra: 768 pixels
+          if (constraints.maxWidth > 768) {
+            return _buildDesktopLayout();
+          } else {
+            return _buildMobileLayout();
+          }
+        },
+      ),
+    );
+  }
+
+  // Layout para telas largas (Desktop)
+  Widget _buildDesktopLayout() {
+    return Row(
+      children: [
+        // Painel Esquerdo: Informativo/Branding
+        Expanded(
+          child: _buildBrandingPanel(),
+        ),
+        // Painel Direito: Formulário de recuperação
+        Expanded(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 32.0),
+              child: _buildRecoverPasswordContent(), // Conteúdo reutilizado
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Layout para telas estreitas (Mobile)
+  Widget _buildMobileLayout() {
+    return Scaffold(
       appBar: AppBar(
         title: Text(
           "Recuperar Senha",
@@ -62,37 +99,83 @@ class _RecoverPasswordViewState extends State<RecoverPasswordView> {
         child: SafeArea(
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(horizontal: 24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(height: 32.0),
-
-                  // Icon and Title Section
-                  _buildHeaderSection(),
-
-                  SizedBox(height: 32.0),
-
-                  if (!_emailSent) ...[
-                    // Email Input Form
-                    _buildEmailForm(),
-                  ] else ...[
-                    // Success Message
-                    _buildSuccessMessage(),
-                  ],
-
-                  SizedBox(height: 32.0),
-                ],
-              ),
-            ),
+            child: _buildRecoverPasswordContent(), // Conteúdo reutilizado
           ),
         ),
       ),
     );
   }
 
+  // Novo Widget: Painel de branding para a versão desktop
+  Widget _buildBrandingPanel() {
+    return Container(
+      color: AppColors.mainGreen,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.lock_open,
+                size: 80,
+                color: Colors.white,
+              ),
+              SizedBox(height: 24),
+              Text(
+                "Recupere seu Acesso",
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 24),
+              Text(
+                "Basta seguir as instruções enviadas para o seu e-mail para criar uma nova senha.",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white.withOpacity(0.9),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Conteúdo principal (formulário e mensagem de sucesso) extraído para reutilização
+  Widget _buildRecoverPasswordContent() {
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: 450),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(height: 32.0),
+            _buildHeaderSection(),
+            SizedBox(height: 32.0),
+            if (!_emailSent) ...[
+              _buildEmailForm(),
+            ] else ...[
+              _buildSuccessMessage(),
+            ],
+            SizedBox(height: 32.0),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Os widgets de conteúdo abaixo permanecem praticamente inalterados, pois já são modulares.
+
   Widget _buildHeaderSection() {
+    // ... (código original sem alterações)
     return Column(
       children: [
         Container(
@@ -135,6 +218,7 @@ class _RecoverPasswordViewState extends State<RecoverPasswordView> {
   }
 
   Widget _buildEmailForm() {
+    // ... (código original sem alterações)
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -271,6 +355,7 @@ class _RecoverPasswordViewState extends State<RecoverPasswordView> {
   }
 
   Widget _buildSuccessMessage() {
+    // ... (código original sem alterações)
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -434,6 +519,7 @@ class _RecoverPasswordViewState extends State<RecoverPasswordView> {
   }
 
   Widget _buildInstructionItem(String text) {
+    // ... (código original sem alterações)
     return Padding(
       padding: EdgeInsets.only(bottom: 6),
       child: Row(
@@ -464,6 +550,7 @@ class _RecoverPasswordViewState extends State<RecoverPasswordView> {
   }
 
   Future<void> _handleSendEmail() async {
+    // ... (código original sem alterações)
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
