@@ -733,68 +733,6 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     );
   }
 
-//  void _showOptionsMenu() {
-//    showModalBottomSheet(
-//      context: context,
-//      shape: RoundedRectangleBorder(
-//        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-//      ),
-//      builder: (context) {
-//        return Container(
-//          padding: EdgeInsets.all(16),
-//          child: Column(
-//            mainAxisSize: MainAxisSize.min,
-//            children: [
-//              Container(
-//                width: 40,
-//                height: 4,
-//                decoration: BoxDecoration(
-//                  color: AppColors.mediumGrey,
-//                  borderRadius: BorderRadius.circular(2),
-//                ),
-//              ),
-//              SizedBox(height: 16),
-//              Text(
-//                "Opções",
-//                style: TextStyle(
-//                  fontSize: 18,
-//                  fontWeight: FontWeight.w600,
-//                  color: AppColors.blackColor,
-//                ),
-//              ),
-//              SizedBox(height: 16),
-//              ListTile(
-//                leading: Icon(Icons.edit, color: AppColors.mainGreen),
-//                title: Text("Registrar Número de Processo"),
-//                onTap: () {
-//                  Navigator.pop(context);
-//                  _showComingSoonDialog("Registrar Número de Processo");
-//                },
-//              ),
-//              ListTile(
-//                leading: Icon(Icons.list_sharp, color: AppColors.blueGreen),
-//                title: Text("Preencher Procuração"),
-//                onTap: () {
-//                  Navigator.pop(context);
-//                  _showComingSoonDialog("Preencher Procuração");
-//                },
-//              ),
-//              ListTile(
-//                leading: Icon(Icons.cancel, color: AppColors.redColor),
-//                title: Text("Encerrar Ação"),
-//                onTap: () {
-//                  Navigator.pop(context);
-//                  _showDeleteConfirmation();
-//                },
-//              ),
-//              SizedBox(height: 16),
-//            ],
-//          ),
-//        );
-//      },
-//    );
-//  }
-
   void _showOptionsMenu() {
     // Obtém o tipo do usuário logado a partir do controller
     final String userType = userCtrl.getCurrentUserType();

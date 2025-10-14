@@ -143,35 +143,11 @@ class UserController extends ChangeNotifier {
     return _currentUser;
   }
 
-  // TODO: Remove Future and FutureBuilder
   Future<String> getCurrentUserName() async {
-    /*var userName = '';
-    await _firestore
-        .collection('users')
-        .where('uid', isEqualTo: getCurrentUserId())
-        .get()
-        .then((result) {
-      userName = result.docs[0].data()['firstName'] ?? '';
-    });
-
-    return userName;*/
-
     return _currentUser.firstName;
   }
 
-  // TODO: Remove Future and FutureBuilder
   Future<String> getCurrentUserTypeFuture() async {
-    /*var userType = 'USER';
-    await _firestore
-        .collection('users')
-        .where('uid', isEqualTo: getCurrentUserId())
-        .get()
-        .then((result) {
-      userType = result.docs[0].data()['type'] ?? 'USER';
-    });
-
-    return userType;*/
-
     return _currentUser.type;
   }
 

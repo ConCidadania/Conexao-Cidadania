@@ -53,14 +53,6 @@ class LawsuitController extends ChangeNotifier {
       debugPrint(
           "Upload de documento '$documentName' realizado com sucesso. URL: $downloadUrl");
 
-      // TODO: Validar onde e se realmente necessário salvar documentação
-      // Salvar download url na ação (?)
-      /*
-      _firestore.collection('lawsuits').doc(currentLawsuitId).update({
-        documentName: downloadUrl,
-      });
-      */
-
       return downloadUrl;
     } on FirebaseException catch (e) {
       debugPrint(
