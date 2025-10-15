@@ -306,7 +306,11 @@ class _RecoverPasswordViewState extends State<RecoverPasswordView> {
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.send, size: 20),
+                      Icon(
+                        Icons.send,
+                        size: 20,
+                        color: Colors.white,
+                      ),
                       SizedBox(width: 8),
                       Text(
                         "Enviar Instruções",

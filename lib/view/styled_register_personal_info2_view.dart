@@ -694,7 +694,11 @@ class _RegisterPersonalInfo2ViewState extends State<RegisterPersonalInfo2View> {
                           ),
                         ),
                         SizedBox(width: 8),
-                        Icon(Icons.arrow_forward, size: 20),
+                        Icon(
+                          Icons.arrow_forward,
+                          size: 20,
+                          color: Colors.white,
+                        ),
                       ],
                     ),
             ),

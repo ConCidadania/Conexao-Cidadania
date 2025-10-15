@@ -56,7 +56,11 @@ class _LawsuitTimelineWidgetState extends State<LawsuitTimelineWidget> {
           alignment: Alignment.centerRight,
           child: OutlinedButton.icon(
             onPressed: _refreshTimeline,
-            icon: Icon(Icons.refresh, size: 18),
+            icon: Icon(
+              Icons.refresh,
+              size: 18,
+              color: AppColors.mainGreen,
+            ),
             label: Text("Atualizar"),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.mainGreen,

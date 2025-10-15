@@ -695,7 +695,11 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                     onPressed: () {
                       _showComingSoonDialog("Editar Ação");
                     },
-                    icon: Icon(Icons.edit, size: 18),
+                    icon: Icon(
+                      Icons.edit,
+                      size: 18,
+                      color: Colors.white,
+                    ),
                     label: Text("Editar"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.mainGreen,
@@ -713,7 +717,11 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                     onPressed: () {
                       _showComingSoonDialog("Compartilhar");
                     },
-                    icon: Icon(Icons.share, size: 18),
+                    icon: Icon(
+                      Icons.share,
+                      size: 18,
+                      color: AppColors.mainGreen,
+                    ),
                     label: Text("Compartilhar"),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.mainGreen,
@@ -817,7 +825,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
             borderRadius: BorderRadius.circular(16),
           ),
           title: Text(
-            "Registrar Processo",
+            "Registrar Número do Processo",
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,

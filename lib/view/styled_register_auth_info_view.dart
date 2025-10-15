@@ -723,7 +723,11 @@ class _RegisterAuthInfoViewState extends State<RegisterAuthInfoView> {
                           ),
                         ),
                         SizedBox(width: 8),
-                        Icon(Icons.check, size: 20),
+                        Icon(
+                          Icons.check,
+                          size: 20,
+                          color: Colors.white,
+                        ),
                       ],
                     ),
             ),

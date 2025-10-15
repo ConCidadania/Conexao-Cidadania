@@ -773,7 +773,11 @@ class _RegisterAddressInfoViewState extends State<RegisterAddressInfoView> {
                           ),
                         ),
                         SizedBox(width: 8),
-                        Icon(Icons.arrow_forward, size: 20),
+                        Icon(
+                          Icons.arrow_forward,
+                          size: 20,
+                          color: Colors.white,
+                        ),
                       ],
                     ),
             ),
