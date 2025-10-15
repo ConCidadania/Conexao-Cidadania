@@ -1,6 +1,3 @@
-/*
-*   TODO: Ainda precisa ser refatorada para adicionar responsividade
-*/
 import 'package:con_cidadania/controller/user_controller.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
@@ -42,21 +39,6 @@ class _RegisterAuthInfoViewState extends State<RegisterAuthInfoView> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
-  }
-
-  // ignore: unused_element
-  String _formatPhoneNumber(String phone) {
-    // Remove all non-digits
-    String digits = phone.replaceAll(RegExp(r'\D'), '');
-
-    if (digits.length == 11) {
-      // Mobile: (XX) XXXXX-XXXX
-      return "(${digits.substring(0, 2)}) ${digits.substring(2, 7)}-${digits.substring(7)}";
-    } else if (digits.length == 10) {
-      // Landline: (XX) XXXX-XXXX
-      return "(${digits.substring(0, 2)}) ${digits.substring(2, 6)}-${digits.substring(6)}";
-    }
-    return phone;
   }
 
   int _getPasswordStrength(String password) {
@@ -107,71 +89,145 @@ class _RegisterAuthInfoViewState extends State<RegisterAuthInfoView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.lightGrey,
-      appBar: _buildAppBar(),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.mainGreen.withOpacity(0.1),
-              AppColors.lightGrey,
-            ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Ponto de quebra: 800 pixels
+          if (constraints.maxWidth > 800) {
+            return _buildDesktopLayout();
+          } else {
+            return _buildMobileLayout();
+          }
+        },
+      ),
+    );
+  }
+
+  // Layout para telas largas (Desktop)
+  Widget _buildDesktopLayout() {
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: _buildBrandingPanel(),
+        ),
+        Expanded(
+          flex: 3,
+          child: Center(
+            child: _buildRegistrationForm(),
           ),
         ),
-        child: SafeArea(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                // Progress Indicator
-                _buildProgressIndicator(),
+      ],
+    );
+  }
 
-                // Form Content
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SizedBox(height: 24.0),
+  // Layout para telas estreitas (Mobile)
+  Widget _buildMobileLayout() {
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: _buildRegistrationForm(),
+    );
+  }
 
-                        // Title Section
-                        _buildTitleSection(),
-
-                        SizedBox(height: 32.0),
-
-                        // Form Fields
-                        _buildEmailField(),
-                        SizedBox(height: 16.0),
-
-                        _buildPhoneField(),
-                        SizedBox(height: 16.0),
-
-                        _buildPasswordField(),
-                        SizedBox(height: 16.0),
-
-                        _buildConfirmPasswordField(),
-                        SizedBox(height: 24.0),
-
-                        // Google Sign In Button
-                        _buildGoogleSignInButton(),
-
-                        SizedBox(height: 32.0),
-                      ],
-                    ),
-                  ),
+  // Novo Widget: Painel informativo para a versão desktop
+  Widget _buildBrandingPanel() {
+    return Container(
+      color: AppColors.mainGreen,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.verified_user_outlined,
+                size: 80,
+                color: Colors.white,
+              ),
+              SizedBox(height: 24),
+              Text(
+                "Segurança da Conta",
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-
-                // Bottom Navigation
-                _buildBottomNavigation(),
-              ],
-            ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 24),
+              Text(
+                "Estamos na última etapa! Crie suas credenciais de acesso para proteger sua conta.",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white.withOpacity(0.9),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 40),
+              _buildProgressIndicator(isDesktop: true),
+            ],
           ),
         ),
       ),
     );
   }
+
+  // O formulário original, agora extraído para um widget reutilizável
+  Widget _buildRegistrationForm() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.mainGreen.withOpacity(0.1),
+            AppColors.lightGrey,
+          ],
+        ),
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            LayoutBuilder(builder: (context, constraints) {
+              if (constraints.maxWidth <= 800) {
+                return _buildProgressIndicator();
+              }
+              return SizedBox.shrink();
+            }),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 24.0),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 500),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(height: 24.0),
+                      _buildTitleSection(),
+                      SizedBox(height: 32.0),
+                      _buildEmailField(),
+                      SizedBox(height: 16.0),
+                      _buildPhoneField(),
+                      SizedBox(height: 16.0),
+                      _buildPasswordField(),
+                      SizedBox(height: 16.0),
+                      _buildConfirmPasswordField(),
+                      SizedBox(height: 24.0),
+                      _buildGoogleSignInButton(),
+                      SizedBox(height: 32.0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            _buildBottomNavigation(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Os métodos auxiliares abaixo permanecem praticamente inalterados.
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
@@ -193,16 +249,20 @@ class _RegisterAuthInfoViewState extends State<RegisterAuthInfoView> {
     );
   }
 
-  Widget _buildProgressIndicator() {
+  Widget _buildProgressIndicator({bool isDesktop = false}) {
+    Color activeColor = Colors.white;
+
     return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.mainGreen,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
+      padding: isDesktop ? EdgeInsets.zero : EdgeInsets.all(16),
+      decoration: isDesktop
+          ? null
+          : BoxDecoration(
+              color: AppColors.mainGreen,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+            ),
       child: Column(
         children: [
           Text(
@@ -216,45 +276,13 @@ class _RegisterAuthInfoViewState extends State<RegisterAuthInfoView> {
           SizedBox(height: 12),
           Row(
             children: [
-              Expanded(
-                child: Container(
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+              Expanded(child: _buildProgressBarStep(color: activeColor)),
               SizedBox(width: 8),
-              Expanded(
-                child: Container(
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+              Expanded(child: _buildProgressBarStep(color: activeColor)),
               SizedBox(width: 8),
-              Expanded(
-                child: Container(
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+              Expanded(child: _buildProgressBarStep(color: activeColor)),
               SizedBox(width: 8),
-              Expanded(
-                child: Container(
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+              Expanded(child: _buildProgressBarStep(color: activeColor)),
             ],
           ),
           SizedBox(height: 8),
@@ -270,7 +298,18 @@ class _RegisterAuthInfoViewState extends State<RegisterAuthInfoView> {
     );
   }
 
+  Widget _buildProgressBarStep({required Color color}) {
+    return Container(
+      height: 4,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
+  }
+
   Widget _buildTitleSection() {
+    // ... (código original sem alterações)
     return Column(
       children: [
         Icon(
@@ -302,6 +341,7 @@ class _RegisterAuthInfoViewState extends State<RegisterAuthInfoView> {
   }
 
   Widget _buildEmailField() {
+    // ... (código original sem alterações)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -356,6 +396,7 @@ class _RegisterAuthInfoViewState extends State<RegisterAuthInfoView> {
   }
 
   Widget _buildPhoneField() {
+    // ... (código original sem alterações)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -514,6 +555,7 @@ class _RegisterAuthInfoViewState extends State<RegisterAuthInfoView> {
   }
 
   Widget _buildConfirmPasswordField() {
+    // ... (código original sem alterações)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -579,6 +621,7 @@ class _RegisterAuthInfoViewState extends State<RegisterAuthInfoView> {
   }
 
   Widget _buildGoogleSignInButton() {
+    // ... (código original sem alterações)
     return SizedBox(
       height: 56,
       child: OutlinedButton.icon(
@@ -610,6 +653,7 @@ class _RegisterAuthInfoViewState extends State<RegisterAuthInfoView> {
   }
 
   Widget _buildBottomNavigation() {
+    // ... (código original sem alterações)
     return Container(
       padding: EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -690,6 +734,7 @@ class _RegisterAuthInfoViewState extends State<RegisterAuthInfoView> {
   }
 
   void _showComingSoonDialog() {
+    // ... (código original sem alterações)
     showDialog(
       context: context,
       builder: (context) {
@@ -730,6 +775,7 @@ class _RegisterAuthInfoViewState extends State<RegisterAuthInfoView> {
   }
 
   Future<void> _handleRegister() async {
+    // ... (código original sem alterações)
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;

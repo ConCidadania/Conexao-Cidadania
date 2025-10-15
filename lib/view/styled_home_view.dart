@@ -736,6 +736,19 @@ class _HomeViewState extends State<HomeView> {
   }
 
   void _showLawsuitTypeDialog(BuildContext context) {
+    // Obtém a largura da tela para a lógica de responsividade
+    final double screenWidth = MediaQuery.of(context).size.width;
+
+    // Determina o número de colunas da grade com base na largura da tela
+    final int crossAxisCount = screenWidth > 900
+        ? 4 // Telas muito largas (desktop)
+        : screenWidth > 600
+            ? 3 // Telas médias (tablet)
+            : 2; // Telas estreitas (mobile)
+
+    // Ajusta a proporção do card para um visual mais quadrado em telas maiores
+    final double childAspectRatio = screenWidth > 600 ? 1.0 : 0.9;
+
     showDialog(
       context: context,
       builder: (context) {
@@ -752,16 +765,22 @@ class _HomeViewState extends State<HomeView> {
             ),
             textAlign: TextAlign.center,
           ),
-          content: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.8,
-            height: MediaQuery.of(context).size.height * 0.5,
+          // Utiliza um Container com constraints para controlar o tamanho do dialog
+          content: Container(
+            // Define uma largura baseada na tela, mas com um limite máximo
+            width: screenWidth * 0.8,
+            constraints: BoxConstraints(
+              maxWidth: 800, // Impede que o dialog fique excessivamente largo
+              maxHeight: 400, // Impede que o dialog fique excessivamente alto
+            ),
             child: GridView.builder(
               shrinkWrap: true,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
+                crossAxisCount:
+                    crossAxisCount, // Usa a contagem de colunas responsiva
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
-                childAspectRatio: 0.9,
+                childAspectRatio: childAspectRatio, // Usa a proporção ajustada
               ),
               itemCount: lawsuitOptions.length,
               itemBuilder: (context, index) {
@@ -817,7 +836,9 @@ class _HomeViewState extends State<HomeView> {
                             data['name'],
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: screenWidth < 600
+                                  ? 12
+                                  : 14, // Fonte ligeiramente maior para legibilidade
                               fontWeight: FontWeight.w600,
                               color: AppColors.blackColor,
                             ),
