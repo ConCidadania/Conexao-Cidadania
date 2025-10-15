@@ -20,6 +20,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
   final ctrl = GetIt.I.get<LawsuitController>();
   final userCtrl = GetIt.I.get<UserController>();
 
+  // Funções de formatação e obtenção de dados permanecem as mesmas
   String _formatDate(String dateString) {
     try {
       DateTime date = DateTime.parse(dateString);
@@ -29,32 +30,8 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     }
   }
 
-  // ignore: unused_element
-  String _getRelativeDate(String dateString) {
-    try {
-      DateTime date = DateTime.parse(dateString);
-      DateTime now = DateTime.now();
-      Duration difference = now.difference(date);
-
-      if (difference.inDays == 0) {
-        return "Hoje";
-      } else if (difference.inDays == 1) {
-        return "Ontem";
-      } else if (difference.inDays < 30) {
-        return "${difference.inDays} dias atrás";
-      } else if (difference.inDays < 365) {
-        int months = (difference.inDays / 30).floor();
-        return "$months ${months == 1 ? 'mês' : 'meses'} atrás";
-      } else {
-        int years = (difference.inDays / 365).floor();
-        return "$years ${years == 1 ? 'ano' : 'anos'} atrás";
-      }
-    } catch (e) {
-      return "Data inválida";
-    }
-  }
-
   IconData _getLawsuitIcon(String type) {
+    // ... (código original sem alterações)
     switch (type) {
       case 'REMEDIO_ALTO_CUSTO':
         return Icons.medical_services;
@@ -71,25 +48,8 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     }
   }
 
-  // ignore: unused_element
-  Color _getLawsuitColor(String type) {
-    switch (type) {
-      case 'REMEDIO_ALTO_CUSTO':
-        return AppColors.redColor;
-      case 'VAGA_CRECHE_PUBLICA':
-        return AppColors.yellowColor;
-      case 'CIRURGIA_EMERGENCIAL':
-        return AppColors.redColor;
-      case 'ALTERACAO_NOME_SOCIAL':
-        return AppColors.blueGreen;
-      case 'INTERNACAO_ILP':
-        return AppColors.tealGreen;
-      default:
-        return AppColors.mainGreen;
-    }
-  }
-
   String _getLawsuitTypeName(String type) {
+    // ... (código original sem alterações)
     switch (type) {
       case 'REMEDIO_ALTO_CUSTO':
         return 'Remédio de Alto Custo';
@@ -144,14 +104,352 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
             return _buildNotFoundState();
           } else {
             DocumentSnapshot currLawsuit = snapshot.data as DocumentSnapshot;
-            return _buildLawsuitDetails(currLawsuit);
+            // O corpo agora usa um LayoutBuilder para decidir qual layout mostrar
+            return LayoutBuilder(builder: (context, constraints) {
+              // Ponto de quebra: se a tela for maior que 900px, usa o layout desktop
+              if (constraints.maxWidth > 900) {
+                return _buildDesktopLayout(currLawsuit);
+              } else {
+                return _buildMobileLayout(currLawsuit);
+              }
+            });
           }
         },
       ),
     );
   }
 
+  // Layout para Mobile (estrutura original)
+  Widget _buildMobileLayout(DocumentSnapshot currLawsuit) {
+    return SingleChildScrollView(
+      child: _buildLawsuitDetails(currLawsuit),
+    );
+  }
+
+  // Novo Layout para Desktop (dois painéis)
+  Widget _buildDesktopLayout(DocumentSnapshot currLawsuit) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Painel Esquerdo
+        Expanded(
+          flex: 3, // Ocupa 3/5 da tela
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(16),
+            child: _buildLeftPanelContent(currLawsuit),
+          ),
+        ),
+        // Painel Direito
+        Expanded(
+          flex: 2, // Ocupa 2/5 da tela
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(0, 16, 16, 16),
+            child: _buildRightPanelContent(currLawsuit),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Conteúdo do painel esquerdo para o layout desktop
+  Widget _buildLeftPanelContent(DocumentSnapshot currLawsuit) {
+    String createdAt = currLawsuit['createdAt'] ?? '';
+    String ownerFirstName = currLawsuit['ownerFirstName'] ?? '';
+    String ownerLastName = currLawsuit['ownerLastName'] ?? '';
+    String ownerName = '$ownerFirstName $ownerLastName';
+    String ownerEmail = currLawsuit['ownerEmail'] ?? 'Email não disponínel';
+    String ownerPhoneNumber =
+        currLawsuit['ownerPhoneNumber'] ?? 'Telefone não disponínel';
+    String type = currLawsuit['type'] ?? '';
+    String status = currLawsuit['status'] ?? 'Status Indisponível';
+
+    return Column(
+      children: [
+        // Card "Informações Gerais"
+        _buildInfoCard(
+          title: "Informações Gerais",
+          icon: Icons.calendar_today,
+          color: AppColors.yellowColor,
+          children: [
+            _buildInfoRow(
+                "Data de Abertura", _formatDate(createdAt), Icons.event),
+            SizedBox(height: 10),
+            _buildInfoRow("Aberto por", ownerName, Icons.account_circle),
+            SizedBox(height: 10),
+            _buildInfoRow("Email", ownerEmail, Icons.email),
+            SizedBox(height: 10),
+            _buildInfoRow("Telefone", ownerPhoneNumber, Icons.phone),
+          ],
+        ),
+        SizedBox(height: 16),
+        // Card "Anexar Documentos"
+        _buildInfoCard(
+          title: "Anexar Documentos",
+          icon: Icons.attach_file_rounded,
+          color: AppColors.darkGreen,
+          children: [
+            DocumentUploadCard(
+              documentName: DocumentType.documento_identidade.name,
+              documentTitle: 'Documento de Identidade (RG, CNH, Certidão)',
+              lawsuitStatus: status,
+            ),
+            DocumentUploadCard(
+              documentName: DocumentType.comprovante_endereco.name,
+              documentTitle: 'Comprovante de Endereço',
+              lawsuitStatus: status,
+            ),
+            DocumentUploadCard(
+              documentName: DocumentType.procuracao_assinada.name,
+              documentTitle: 'Procuração (Preenchida e Assinada)',
+              lawsuitStatus: status,
+            ),
+            _buildUniqueDocUploadCards(type, status),
+          ],
+        ),
+        SizedBox(height: 16),
+        // Card "Ações Disponíveis"
+        _buildActionsCard(),
+      ],
+    );
+  }
+
+  // Conteúdo do painel direito para o layout desktop
+  Widget _buildRightPanelContent(DocumentSnapshot currLawsuit) {
+    String name = currLawsuit['name'] ?? 'Nome não disponível';
+    String type = currLawsuit['type'] ?? '';
+    String judicialProcessNumber = currLawsuit['judicialProcessNumber'] ?? '';
+    String status = currLawsuit['status'] ?? 'Status Indisponível';
+
+    return Column(
+      children: [
+        // Header Card
+        _buildHeaderCard(name, type),
+        SizedBox(height: 16),
+        // Card "Status da Ação"
+        _buildInfoCard(
+          title: "Status da Ação",
+          icon: Icons.info_outline,
+          color: AppColors.blueGreen,
+          children: [
+            _buildInfoRow("Status Atual", status, Icons.pending_actions),
+          ],
+        ),
+        SizedBox(height: 16),
+        // Card "Andamento Processual"
+        _buildInfoCard(
+          title: "Andamento Processual",
+          icon: Icons.timeline,
+          color: AppColors.blueGreen,
+          children: [
+            if (judicialProcessNumber.isNotEmpty)
+              LawsuitTimelineWidget(numeroProcesso: judicialProcessNumber)
+            else
+              Row(
+                children: [
+                  Icon(Icons.info_outline,
+                      color: AppColors.mediumGrey, size: 18),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "O número do processo judicial ainda não foi atribuído a esta ação.",
+                      style:
+                          TextStyle(fontSize: 14, color: AppColors.mediumGrey),
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // O conteúdo principal agora é chamado pelo layout mobile
+  Widget _buildLawsuitDetails(DocumentSnapshot currLawsuit) {
+    String name = currLawsuit['name'] ?? 'Nome não disponível';
+    String createdAt = currLawsuit['createdAt'] ?? '';
+    String type = currLawsuit['type'] ?? '';
+    String ownerFirstName = currLawsuit['ownerFirstName'] ?? '';
+    String ownerLastName = currLawsuit['ownerLastName'] ?? '';
+    String ownerName = '$ownerFirstName $ownerLastName';
+    String ownerEmail = currLawsuit['ownerEmail'] ?? 'Email não disponínel';
+    String ownerPhoneNumber =
+        currLawsuit['ownerPhoneNumber'] ?? 'Telefone não disponínel';
+    String judicialProcessNumber = currLawsuit['judicialProcessNumber'] ?? '';
+    String status = currLawsuit['status'] ?? 'Status Indisponível';
+
+    return Column(
+      children: [
+        // O Header agora é um método separado para ser reutilizado
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: _buildHeaderCard(name, type),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            children: [
+              _buildInfoCard(
+                title: "Informações Gerais",
+                icon: Icons.calendar_today,
+                color: AppColors.yellowColor,
+                children: [
+                  _buildInfoRow(
+                      "Data de Abertura", _formatDate(createdAt), Icons.event),
+                  SizedBox(height: 10),
+                  _buildInfoRow("Aberto por", ownerName, Icons.account_circle),
+                  SizedBox(height: 10),
+                  _buildInfoRow("Email", ownerEmail, Icons.email),
+                  SizedBox(height: 10),
+                  _buildInfoRow("Telefone", ownerPhoneNumber, Icons.phone),
+                ],
+              ),
+              SizedBox(height: 16),
+              _buildInfoCard(
+                title: "Anexar Documentos",
+                icon: Icons.attach_file_rounded,
+                color: AppColors.darkGreen,
+                children: [
+                  DocumentUploadCard(
+                    documentName: DocumentType.documento_identidade.name,
+                    documentTitle:
+                        'Documento de Identidade (RG, CNH, Certidão)',
+                    lawsuitStatus: status,
+                  ),
+                  DocumentUploadCard(
+                    documentName: DocumentType.comprovante_endereco.name,
+                    documentTitle: 'Comprovante de Endereço',
+                    lawsuitStatus: status,
+                  ),
+                  DocumentUploadCard(
+                    documentName: DocumentType.procuracao_assinada.name,
+                    documentTitle: 'Procuração (Preenchida e Assinada)',
+                    lawsuitStatus: status,
+                  ),
+                  _buildUniqueDocUploadCards(type, status),
+                ],
+              ),
+              SizedBox(height: 16),
+              _buildInfoCard(
+                title: "Status da Ação",
+                icon: Icons.info_outline,
+                color: AppColors.blueGreen,
+                children: [
+                  _buildInfoRow("Status Atual", status, Icons.pending_actions),
+                ],
+              ),
+              SizedBox(height: 16),
+              _buildInfoCard(
+                title: "Andamento Processual",
+                icon: Icons.timeline,
+                color: AppColors.blueGreen,
+                children: [
+                  if (judicialProcessNumber.isNotEmpty)
+                    LawsuitTimelineWidget(numeroProcesso: judicialProcessNumber)
+                  else
+                    Row(
+                      children: [
+                        Icon(Icons.info_outline,
+                            color: AppColors.mediumGrey, size: 18),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            "O número do processo judicial ainda não foi atribuído a esta ação.",
+                            style: TextStyle(
+                                fontSize: 14, color: AppColors.mediumGrey),
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+              SizedBox(height: 16),
+              _buildActionsCard(),
+              SizedBox(height: 32),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // O Header Card foi extraído para um método próprio para ser reutilizado
+  Widget _buildHeaderCard(String name, String type) {
+    return Card(
+      elevation: 8,
+      shadowColor: Colors.black.withOpacity(0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      // Header Card
+      child: Container(
+        width: double.infinity,
+        margin: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.mainGreen,
+              AppColors.darkGreen,
+            ],
+          ),
+        ),
+        padding: EdgeInsets.all(24),
+        child: Column(
+          children: [
+            // Icon
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(
+                _getLawsuitIcon(type),
+                size: 40,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: 16),
+            // Title
+            Text(
+              name,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 8),
+            // Type
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                _getLawsuitTypeName(type),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Os demais widgets e métodos permanecem inalterados
   Widget _buildLoadingState() {
+    // ... (código original sem alterações)
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -174,6 +472,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
   }
 
   Widget _buildErrorState(String error) {
+    // ... (código original sem alterações)
     return Center(
       child: Padding(
         padding: EdgeInsets.all(32),
@@ -224,6 +523,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
   }
 
   Widget _buildNotFoundState() {
+    // ... (código original sem alterações)
     return Center(
       child: Padding(
         padding: EdgeInsets.all(32),
@@ -274,6 +574,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
   }
 
   Widget _buildUniqueDocUploadCards(String lawsuitType, String lawsuitStatus) {
+    // ... (código original sem alterações)
     switch (lawsuitType) {
       case 'VAGA_CRECHE_PUBLICA':
         return Column(
@@ -334,239 +635,13 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     return SizedBox.shrink();
   }
 
-  Widget _buildLawsuitDetails(DocumentSnapshot currLawsuit) {
-    String name = currLawsuit['name'] ?? 'Nome não disponível';
-    String createdAt = currLawsuit['createdAt'] ?? '';
-    String type = currLawsuit['type'] ?? '';
-
-    String ownerFirstName = currLawsuit['ownerFirstName'] ?? '';
-    String ownerLastName = currLawsuit['ownerLastName'] ?? '';
-    String ownerName = '$ownerFirstName $ownerLastName';
-    String ownerEmail = currLawsuit['ownerEmail'] ?? 'Email não disponínel';
-    String ownerPhoneNumber =
-        currLawsuit['ownerPhoneNumber'] ?? 'Telefone não disponínel';
-    String judicialProcessNumber = currLawsuit['judicialProcessNumber'] ?? '';
-    String status = currLawsuit['status'] ?? 'Status Indisponível';
-
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // Header Card
-          Container(
-            width: double.infinity,
-            margin: EdgeInsets.all(16),
-            child: Card(
-              elevation: 8,
-              shadowColor: Colors.black.withOpacity(0.1),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.mainGreen,
-                      AppColors.darkGreen,
-                    ],
-                  ),
-                ),
-                padding: EdgeInsets.all(24),
-                child: Column(
-                  children: [
-                    // Icon
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Icon(
-                        _getLawsuitIcon(type),
-                        size: 40,
-                        color: Colors.white,
-                      ),
-                    ),
-
-                    SizedBox(height: 16),
-
-                    // Title
-                    Text(
-                      name,
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-
-                    SizedBox(height: 8),
-
-                    // Type
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        _getLawsuitTypeName(type),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Details Cards
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              children: [
-                // Date Information Card
-                _buildInfoCard(
-                  title: "Informações Gerais",
-                  icon: Icons.calendar_today,
-                  color: AppColors.yellowColor,
-                  children: [
-                    _buildInfoRow(
-                      "Data de Abertura",
-                      _formatDate(createdAt),
-                      Icons.event,
-                    ),
-                    SizedBox(height: 10),
-                    _buildInfoRow(
-                      "Aberto por",
-                      ownerName,
-                      Icons.account_circle,
-                    ),
-                    SizedBox(height: 10),
-                    _buildInfoRow(
-                      "Email",
-                      ownerEmail,
-                      Icons.email,
-                    ),
-                    SizedBox(height: 10),
-                    _buildInfoRow(
-                      "Telefone",
-                      ownerPhoneNumber,
-                      Icons.phone,
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: 16),
-
-                // Documents Card
-                _buildInfoCard(
-                  title: "Anexar Documentos",
-                  icon: Icons.attach_file_rounded,
-                  color: AppColors.darkGreen,
-                  children: [
-                    // 1. Upload de Documento de Identidade
-                    DocumentUploadCard(
-                      documentName: DocumentType.documento_identidade.name,
-                      documentTitle:
-                          'Documento de Identidade (RG, CNH, Certidão)',
-                      lawsuitStatus: status,
-                    ),
-
-                    // 2. Upload de Comprovante de Endereço
-                    DocumentUploadCard(
-                      documentName: DocumentType.comprovante_endereco.name,
-                      documentTitle: 'Comprovante de Endereço',
-                      lawsuitStatus: status,
-                    ),
-
-                    // 3. Upload da Procuração Assinada
-                    DocumentUploadCard(
-                      documentName: DocumentType.procuracao_assinada.name,
-                      documentTitle: 'Procuração (Preenchida e Assinada)',
-                      lawsuitStatus: status,
-                    ),
-
-                    // Cards de upload de documentos contextuais baseados no tipo da ação
-                    _buildUniqueDocUploadCards(type, status),
-                  ],
-                ),
-
-                SizedBox(height: 16),
-
-                // Status Card
-                _buildInfoCard(
-                  title: "Status da Ação",
-                  icon: Icons.info_outline,
-                  color: AppColors.blueGreen,
-                  children: [
-                    _buildInfoRow(
-                      "Status Atual",
-                      status,
-                      Icons.pending_actions,
-                    ),
-                  ],
-                ),
-                // Andamento Processual
-                _buildInfoCard(
-                  title: "Andamento Processual",
-                  icon: Icons.timeline, // Ícone mais apropriado
-                  color: AppColors.blueGreen,
-                  children: [
-                    // Condicional para exibir o widget de histórico apenas se houver um número de processo
-                    if (judicialProcessNumber.isNotEmpty)
-                      LawsuitTimelineWidget(
-                          numeroProcesso: judicialProcessNumber)
-                    else
-                      // Mensagem exibida caso a ação ainda não tenha um número de processo
-                      Row(
-                        children: [
-                          Icon(Icons.info_outline,
-                              color: AppColors.mediumGrey, size: 18),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              "O número do processo judicial ainda não foi atribuído a esta ação.",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: AppColors.mediumGrey,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
-
-                SizedBox(height: 16),
-
-                // Actions Card
-                _buildActionsCard(),
-
-                SizedBox(height: 32),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildInfoCard({
     required String title,
     required IconData icon,
     required Color color,
     required List<Widget> children,
   }) {
+    // ... (código original sem alterações)
     return Card(
       elevation: 4,
       shadowColor: Colors.black.withOpacity(0.1),
@@ -612,6 +687,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
   }
 
   Widget _buildInfoRow(String label, String value, IconData icon) {
+    // ... (código original sem alterações)
     return Row(
       children: [
         Icon(
@@ -649,6 +725,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
   }
 
   Widget _buildActionsCard() {
+    // ... (código original sem alterações)
     return Card(
       elevation: 4,
       shadowColor: Colors.black.withOpacity(0.1),
@@ -742,7 +819,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
   }
 
   void _showOptionsMenu() {
-    // Obtém o tipo do usuário logado a partir do controller
+    // ... (código original sem alterações)
     final String userType = userCtrl.getCurrentUserType();
 
     showModalBottomSheet(
@@ -813,6 +890,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
   }
 
   void _showRegisterProcessNumberDialog() {
+    // ... (código original sem alterações)
     final TextEditingController _processNumberController =
         TextEditingController();
     final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -905,6 +983,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
   }
 
   void _showComingSoonDialog(String feature) {
+    // ... (código original sem alterações)
     showDialog(
       context: context,
       builder: (context) {
@@ -945,6 +1024,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
   }
 
   void _showDeleteConfirmation() {
+    // ... (código original sem alterações)
     showDialog(
       context: context,
       builder: (context) {

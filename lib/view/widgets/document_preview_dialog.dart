@@ -8,7 +8,7 @@ class DocumentPreviewDialog extends StatefulWidget {
   final String storagePath;
   final String documentTitle;
   // A URL já pode ser passada se o card já a conhece (após o upload)
-  final String? uploadedFileUrl; 
+  final String? uploadedFileUrl;
 
   const DocumentPreviewDialog({
     super.key,
@@ -33,7 +33,8 @@ class _DocumentPreviewDialogState extends State<DocumentPreviewDialog> {
       _downloadUrlFuture = Future.value(widget.uploadedFileUrl);
     } else {
       // Chamada ao método do controller para obter a URL
-      _downloadUrlFuture = lawsuitCtrl.getDocumentDownloadURL(widget.storagePath);
+      _downloadUrlFuture =
+          lawsuitCtrl.getDocumentDownloadURL(widget.storagePath);
     }
   }
 
@@ -49,13 +50,16 @@ class _DocumentPreviewDialogState extends State<DocumentPreviewDialog> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ação iniciada no navegador. Verifique a pasta Downloads.')),
+          SnackBar(
+              content: Text(
+                  'Ação iniciada no navegador. Verifique a pasta Downloads.')),
         );
       }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Não foi possível iniciar a ação no navegador.')),
+          SnackBar(
+              content: Text('Não foi possível iniciar a ação no navegador.')),
         );
       }
     }
@@ -75,7 +79,7 @@ class _DocumentPreviewDialogState extends State<DocumentPreviewDialog> {
       ),
       content: SizedBox(
         // Altura e largura limitadas para um dialog
-        width: MediaQuery.of(context).size.width * 0.7, 
+        width: MediaQuery.of(context).size.width * 0.2,
         child: FutureBuilder<String?>(
           future: _downloadUrlFuture,
           builder: (context, snapshot) {
@@ -91,7 +95,7 @@ class _DocumentPreviewDialogState extends State<DocumentPreviewDialog> {
                 ),
               );
             }
-            
+
             if (snapshot.hasError || snapshot.data == null) {
               return Center(
                 child: Text(
@@ -101,9 +105,9 @@ class _DocumentPreviewDialogState extends State<DocumentPreviewDialog> {
                 ),
               );
             }
-            
+
             final downloadUrl = snapshot.data!;
-            
+
             return Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -112,15 +116,19 @@ class _DocumentPreviewDialogState extends State<DocumentPreviewDialog> {
                 Center(
                   child: Column(
                     children: [
-                      Icon(Icons.description, size: 48, color: AppColors.mainGreen),
+                      Icon(Icons.description,
+                          size: 48, color: AppColors.mainGreen),
                       SizedBox(height: 8),
-                      Text("Arquivo Carregado", style: TextStyle(fontWeight: FontWeight.w600)),
-                      Text(widget.storagePath, style: TextStyle(fontSize: 12, color: AppColors.mediumGrey)),
+                      Text("Arquivo Carregado",
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      Text(widget.storagePath,
+                          style: TextStyle(
+                              fontSize: 12, color: AppColors.mediumGrey)),
                     ],
                   ),
                 ),
                 SizedBox(height: 20),
-                
+
                 // Botão para PRÉ-VISUALIZAR em uma nova aba
                 /*OutlinedButton.icon(
                   onPressed: () => _triggerWebAction(downloadUrl),
@@ -134,17 +142,18 @@ class _DocumentPreviewDialogState extends State<DocumentPreviewDialog> {
                 ),
                 SizedBox(height: 12),
                 */
-                
+
                 // Botão de Download Persistente (Web)
                 ElevatedButton.icon(
                   onPressed: () => _triggerWebAction(downloadUrl),
                   icon: Icon(Icons.download, color: Colors.white),
                   label: Text("Download (Web)"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.mainGreen, 
+                    backgroundColor: AppColors.mainGreen,
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
                 ),
               ],
