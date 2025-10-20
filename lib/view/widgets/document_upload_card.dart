@@ -228,7 +228,11 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
                               color: Colors.white,
                             ),
                           )
-                        : Icon(Icons.cloud_upload, size: 18),
+                        : Icon(
+                            Icons.cloud_upload,
+                            size: 18,
+                            color: Colors.white,
+                          ),
                     label: Text(_isUploading ? "Enviando..." : "Upload"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.mainGreen,

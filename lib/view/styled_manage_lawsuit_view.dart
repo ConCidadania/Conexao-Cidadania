@@ -863,11 +863,20 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.list_sharp, color: AppColors.blueGreen),
-                  title: Text("Preencher Procuração"),
+                  leading: Icon(Icons.file_copy, color: AppColors.blueGreen),
+                  title: Text("Emitir Procuração"),
                   onTap: () {
                     Navigator.pop(context);
-                    _showComingSoonDialog("Preencher Procuração");
+                    _showComingSoonDialog("Emitir Procuração");
+                  },
+                ),
+                ListTile(
+                  leading:
+                      Icon(Icons.edit_document, color: AppColors.blueGreen),
+                  title: Text("Preencher Petição"),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showComingSoonDialog("Preencher Petição");
                   },
                 ),
               ],
