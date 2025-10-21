@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:con_cidadania/model/datajud_lawsuit_model.dart';
 
 class DatajudService {
-  //final String _baseUrl = "https://api-publica.datajud.cnj.jus.br/api_publica/_search";
+  //final String _baseUrl = "https://api-publica.datajud.cnj.jus.br/api_publica_tjsp/_search";
   final String _baseUrl =
       "https://api-publica.datajud.cnj.jus.br/api_publica_trf1/_search";
   final String apiKey =

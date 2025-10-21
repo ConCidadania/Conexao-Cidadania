@@ -341,7 +341,7 @@ class _RecoverPasswordViewState extends State<RecoverPasswordView> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.arrow_back, size: 18),
+                Icon(Icons.arrow_back, size: 18, color: AppColors.mainGreen),
                 SizedBox(width: 8),
                 Text(
                   "Voltar ao Login",
