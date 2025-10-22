@@ -11,12 +11,18 @@ class DocumentUploadCard extends StatefulWidget {
   final String documentName;
   final String documentTitle;
   final String lawsuitStatus;
+  final Function({
+    required String storagePath,
+    required String documentTitle,
+    String? uploadedFileUrl,
+  }) onPreviewRequested; // Adicione este callback
 
   const DocumentUploadCard({
     super.key,
     required this.documentName,
     required this.documentTitle,
     required this.lawsuitStatus,
+    required this.onPreviewRequested,
   });
 
   @override
@@ -38,6 +44,14 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
     super.initState();
     // Carrega a url de download se existir
     _tryLoadFile();
+  }
+
+  void _onPreviewRequested() {
+    print("Requested Preview for: ${widget.documentTitle}");
+    widget.onPreviewRequested(
+        storagePath: widget.documentName,
+        documentTitle: widget.documentTitle,
+        uploadedFileUrl: _uploadedFileUrl);
   }
 
   Future<void> _pickFile() async {
@@ -114,6 +128,7 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
   }
 
   // Método para exibir a pré-visualização e download
+  // ignore: unused_element
   void _showPreviewDialog() {
     if (_uploadedFileUrl != null) {
       showDialog(
@@ -140,7 +155,7 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
       // Envolver o Card em InkWell para capturar o onTap
       child: InkWell(
         // O onTap só funciona se o arquivo estiver anexado (uploaded)
-        onTap: isPreviewAvailable ? _showPreviewDialog : null,
+        onTap: isPreviewAvailable ? _onPreviewRequested : null,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16.0),

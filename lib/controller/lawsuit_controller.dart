@@ -42,7 +42,8 @@ class LawsuitController extends ChangeNotifier {
 
       final SettableMetadata metadata = SettableMetadata(
         contentType: getContentType(fileName),
-        contentDisposition: 'attachment; filename="$fileName"',
+        // Metadados para download (conflito com exibição ...)
+        //contentDisposition: 'attachment; filename="$fileName"',
       );
 
       final UploadTask uploadTask = ref.putData(fileData, metadata);

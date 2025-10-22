@@ -3,6 +3,7 @@ import 'package:con_cidadania/controller/lawsuit_controller.dart';
 import 'package:con_cidadania/controller/user_controller.dart';
 import 'package:con_cidadania/model/lawsuit_model.dart';
 import 'package:con_cidadania/view/widgets/document_upload_card.dart';
+import 'package:con_cidadania/view/widgets/document_viewer_panel.dart';
 import 'package:con_cidadania/view/widgets/lawsuit_timeline_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -19,6 +20,37 @@ class ManageLawsuitView extends StatefulWidget {
 class _ManageLawsuitViewState extends State<ManageLawsuitView> {
   final ctrl = GetIt.I.get<LawsuitController>();
   final userCtrl = GetIt.I.get<UserController>();
+
+  // Novas variáveis de estado para o visualizador
+  bool _isViewingDocument = false;
+  String? _viewingDocumentPath;
+  String? _viewingDocumentTitle;
+  String? _viewingDocumentUrl; // Opcional, se já tiver a URL
+
+  // Função para ABRIR o visualizador
+  void _openDocumentViewer({
+    required String storagePath,
+    required String documentTitle,
+    String? uploadedFileUrl,
+  }) {
+    print("Viewer Opened for: $documentTitle");
+    setState(() {
+      _isViewingDocument = true;
+      _viewingDocumentPath = storagePath;
+      _viewingDocumentTitle = documentTitle;
+      _viewingDocumentUrl = uploadedFileUrl;
+    });
+  }
+
+  // Função para FECHAR o visualizador (será passada como callback)
+  void _closeDocumentViewer() {
+    setState(() {
+      _isViewingDocument = false;
+      _viewingDocumentPath = null;
+      _viewingDocumentTitle = null;
+      _viewingDocumentUrl = null;
+    });
+  }
 
   // Funções de formatação e obtenção de dados permanecem as mesmas
   String _formatDate(String dateString) {
@@ -120,31 +152,92 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
   }
 
   // Layout para Mobile (estrutura original)
+  // Widget _buildMobileLayout(DocumentSnapshot currLawsuit) {
+  //   return SingleChildScrollView(
+  //     child: _buildLawsuitDetails(currLawsuit),
+  //   );
+  // }
+
   Widget _buildMobileLayout(DocumentSnapshot currLawsuit) {
-    return SingleChildScrollView(
-      child: _buildLawsuitDetails(currLawsuit),
-    );
+    // Se estiver visualizando, mostra SÓ o painel de visualização
+    if (_isViewingDocument) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0), // Adiciona padding ao redor
+        child: DocumentViewerPanel(
+          key: ValueKey(_viewingDocumentPath),
+          storagePath: _viewingDocumentPath!,
+          documentTitle: _viewingDocumentTitle!,
+          uploadedFileUrl: _viewingDocumentUrl,
+          onClose: _closeDocumentViewer,
+        ),
+      );
+    } else {
+      // Caso contrário, mostra o layout normal
+      return SingleChildScrollView(
+        child: _buildLawsuitDetails(currLawsuit),
+      );
+    }
   }
 
   // Novo Layout para Desktop (dois painéis)
+  // Widget _buildDesktopLayout(DocumentSnapshot currLawsuit) {
+  //   return Row(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       // Painel Esquerdo
+  //       Expanded(
+  //         flex: 3, // Ocupa 3/5 da tela
+  //         child: SingleChildScrollView(
+  //           padding: EdgeInsets.all(16),
+  //           child: _buildLeftPanelContent(currLawsuit),
+  //         ),
+  //       ),
+  //       // Painel Direito
+  //       Expanded(
+  //         flex: 2, // Ocupa 2/5 da tela
+  //         child: SingleChildScrollView(
+  //           padding: EdgeInsets.fromLTRB(0, 16, 16, 16),
+  //           child: _buildRightPanelContent(currLawsuit),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
+
   Widget _buildDesktopLayout(DocumentSnapshot currLawsuit) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Painel Esquerdo
+        // Painel Esquerdo (permanece o mesmo, a menos que _isViewingDocument seja true)
         Expanded(
-          flex: 3, // Ocupa 3/5 da tela
+          flex: _isViewingDocument
+              ? 2
+              : 3, // Ajusta o flex se estiver visualizando
           child: SingleChildScrollView(
             padding: EdgeInsets.all(16),
+            // Mostra o conteúdo normal OU o visualizador se o painel esquerdo for escolhido
             child: _buildLeftPanelContent(currLawsuit),
           ),
         ),
-        // Painel Direito
+        // Painel Direito (substituído pelo visualizador quando ativo)
         Expanded(
-          flex: 2, // Ocupa 2/5 da tela
-          child: SingleChildScrollView(
+          flex: _isViewingDocument ? 3 : 2, // Ajusta o flex
+          child: Padding(
+            // Usa Padding em vez de SingleChildScrollView para o viewer
             padding: EdgeInsets.fromLTRB(0, 16, 16, 16),
-            child: _buildRightPanelContent(currLawsuit),
+            child: _isViewingDocument
+                ? DocumentViewerPanel(
+                    key: ValueKey(
+                        _viewingDocumentPath), // Chave para reconstruir
+                    storagePath: _viewingDocumentPath!,
+                    documentTitle: _viewingDocumentTitle!,
+                    uploadedFileUrl: _viewingDocumentUrl,
+                    onClose: _closeDocumentViewer, // Passa a função de fechar
+                  )
+                // Se não estiver visualizando, mostra o conteúdo normal
+                : SingleChildScrollView(
+                    child: _buildRightPanelContent(currLawsuit),
+                  ),
           ),
         ),
       ],
@@ -192,16 +285,19 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
               documentName: DocumentType.documento_identidade.name,
               documentTitle: 'Documento de Identidade (RG, CNH, Certidão)',
               lawsuitStatus: status,
+              onPreviewRequested: _openDocumentViewer,
             ),
             DocumentUploadCard(
               documentName: DocumentType.comprovante_endereco.name,
               documentTitle: 'Comprovante de Endereço',
               lawsuitStatus: status,
+              onPreviewRequested: _openDocumentViewer,
             ),
             DocumentUploadCard(
               documentName: DocumentType.procuracao_assinada.name,
               documentTitle: 'Procuração (Preenchida e Assinada)',
               lawsuitStatus: status,
+              onPreviewRequested: _openDocumentViewer,
             ),
             _buildUniqueDocUploadCards(type, status),
           ],
@@ -315,16 +411,19 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                     documentTitle:
                         'Documento de Identidade (RG, CNH, Certidão)',
                     lawsuitStatus: status,
+                    onPreviewRequested: _openDocumentViewer,
                   ),
                   DocumentUploadCard(
                     documentName: DocumentType.comprovante_endereco.name,
                     documentTitle: 'Comprovante de Endereço',
                     lawsuitStatus: status,
+                    onPreviewRequested: _openDocumentViewer,
                   ),
                   DocumentUploadCard(
                     documentName: DocumentType.procuracao_assinada.name,
                     documentTitle: 'Procuração (Preenchida e Assinada)',
                     lawsuitStatus: status,
+                    onPreviewRequested: _openDocumentViewer,
                   ),
                   _buildUniqueDocUploadCards(type, status),
                 ],
@@ -584,6 +683,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
               documentName: DocumentType.protocolo_inscricao_creche.name,
               documentTitle: 'Protocolo de Inscrição na Creche',
               lawsuitStatus: lawsuitStatus,
+              onPreviewRequested: _openDocumentViewer,
             ),
 
             // 2. Upload Documento Pessoal da Criança
@@ -592,6 +692,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
               documentTitle:
                   'Documento Pessoal da Criança (Cetidão de Nascimento, RG)',
               lawsuitStatus: lawsuitStatus,
+              onPreviewRequested: _openDocumentViewer,
             ),
           ],
         );
@@ -603,6 +704,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
               documentName: DocumentType.copia_prontuario_medico.name,
               documentTitle: 'Cópia do Prontuário Médico (Exames e Relatórios)',
               lawsuitStatus: lawsuitStatus,
+              onPreviewRequested: _openDocumentViewer,
             ),
 
             // 2. Upload Cópia do Receituário Médico
@@ -610,6 +712,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
               documentName: DocumentType.copia_receituario_medico.name,
               documentTitle: 'Cópia do Receituário Médico (Prescrição Médica)',
               lawsuitStatus: lawsuitStatus,
+              onPreviewRequested: _openDocumentViewer,
             ),
 
             // 3. Upload Cópia do Expediente Administrativo da Secretaria da Saúde
@@ -619,6 +722,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
               documentTitle:
                   'Cópia do Expediente Administrativo da Secretaria da Saúde',
               lawsuitStatus: lawsuitStatus,
+              onPreviewRequested: _openDocumentViewer,
             ),
 
             // 4. Upload Três Últimos Holerites
@@ -626,6 +730,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
               documentName: DocumentType.tres_ultimos_holerites.name,
               documentTitle: 'Três Últimos Holerites',
               lawsuitStatus: lawsuitStatus,
+              onPreviewRequested: _openDocumentViewer,
             ),
           ],
         );
