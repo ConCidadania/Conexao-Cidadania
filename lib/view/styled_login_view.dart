@@ -130,7 +130,7 @@ class _LoginViewState extends State<LoginView> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(16.0),
                 child: Image.asset(
-                  'assets/images/justice.jpg',
+                  'assets/images/logo.jpg',
                   fit: BoxFit.contain,
                   height: 250,
                 ),
