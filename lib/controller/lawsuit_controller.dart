@@ -37,7 +37,7 @@ class LawsuitController extends ChangeNotifier {
     try {
       // Usamos documentName aqui para padronização do nome do arquivo
       final String path =
-          'files/users/${userType == 'USER' ? userId : await getCurrentLawsuitOwnerId()}/lawsuits/$_currentLawsuitId/docs/$documentName';
+          'files/users/${userType == 'USER' ? userId : await getCurrentLawsuitOwnerId()}/lawsuits/$_currentLawsuitId/docs/${'$documentName.${getFileExtension(fileName)}'}';
       final Reference ref = _storage.ref().child(path);
 
       final SettableMetadata metadata = SettableMetadata(
@@ -160,4 +160,9 @@ String? getContentType(String fileName) {
     default:
       return null;
   }
+}
+
+String getFileExtension(String fileName) {
+  final extension = fileName.split('.').last.toLowerCase();
+  return extension;
 }

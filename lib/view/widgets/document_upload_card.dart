@@ -50,7 +50,7 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
     print("Requested Preview for: ${widget.documentTitle}");
     widget.onPreviewRequested(
         storagePath: widget.documentName,
-        documentTitle: widget.documentTitle,
+        documentTitle: widget.documentName,
         uploadedFileUrl: _uploadedFileUrl);
   }
 
@@ -78,11 +78,18 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
       _uploadedFileUrl = null;
     });
 
+    String storePath;
+    String? downloadUrl;
+    List<String> allowedExtensions = ['png', 'jpg', 'pdf'];
+
     // Recupera a url de download se existir
-    final String storePath =
-        'files/users/${userCtrl.getCurrentUserType() == 'USER' ? userCtrl.getCurrentUserId() : await lawsuitCtrl.getCurrentLawsuitOwnerId()}/lawsuits/${lawsuitCtrl.currentLawsuitId}/docs/${widget.documentName}';
-    final String? downloadUrl =
-        await lawsuitCtrl.getDocumentDownloadURL(storePath);
+    for (int i = 0; i < 3; i++) {
+      print("Trying: '${widget.documentName}.${allowedExtensions[i]}'");
+      storePath =
+          'files/users/${userCtrl.getCurrentUserType() == 'USER' ? userCtrl.getCurrentUserId() : await lawsuitCtrl.getCurrentLawsuitOwnerId()}/lawsuits/${lawsuitCtrl.currentLawsuitId}/docs/${widget.documentName}.${allowedExtensions[i]}';
+      downloadUrl = await lawsuitCtrl.getDocumentDownloadURL(storePath);
+      if (downloadUrl != null) break;
+    }
 
     setState(() {
       _isUploading = false;
