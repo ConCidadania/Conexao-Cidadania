@@ -47,15 +47,10 @@ class _DocumentViewerPanelState extends State<DocumentViewerPanel> {
   void _triggerDownload(String url) async {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
-      html.AnchorElement anchorElement = html.AnchorElement(href: url);
-      anchorElement.download =
-          widget.documentTitle; // Optional: specify a default filename
-      anchorElement.click();
-
-      /*await launchUrl(
+      await launchUrl(
         uri,
         mode: LaunchMode.externalApplication, // Força o download
-      );*/
+      );
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
