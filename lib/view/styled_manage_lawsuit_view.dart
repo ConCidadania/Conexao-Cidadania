@@ -151,13 +151,6 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     );
   }
 
-  // Layout para Mobile (estrutura original)
-  // Widget _buildMobileLayout(DocumentSnapshot currLawsuit) {
-  //   return SingleChildScrollView(
-  //     child: _buildLawsuitDetails(currLawsuit),
-  //   );
-  // }
-
   Widget _buildMobileLayout(DocumentSnapshot currLawsuit) {
     // Se estiver visualizando, mostra SÓ o painel de visualização
     if (_isViewingDocument) {
@@ -178,31 +171,6 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
       );
     }
   }
-
-  // Novo Layout para Desktop (dois painéis)
-  // Widget _buildDesktopLayout(DocumentSnapshot currLawsuit) {
-  //   return Row(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       // Painel Esquerdo
-  //       Expanded(
-  //         flex: 3, // Ocupa 3/5 da tela
-  //         child: SingleChildScrollView(
-  //           padding: EdgeInsets.all(16),
-  //           child: _buildLeftPanelContent(currLawsuit),
-  //         ),
-  //       ),
-  //       // Painel Direito
-  //       Expanded(
-  //         flex: 2, // Ocupa 2/5 da tela
-  //         child: SingleChildScrollView(
-  //           padding: EdgeInsets.fromLTRB(0, 16, 16, 16),
-  //           child: _buildRightPanelContent(currLawsuit),
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
 
   Widget _buildDesktopLayout(DocumentSnapshot currLawsuit) {
     return Row(

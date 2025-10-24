@@ -177,7 +177,7 @@ class _DocumentViewerPanelState extends State<DocumentViewerPanel> {
                       ElevatedButton.icon(
                         onPressed: () => _triggerDownload(downloadUrl),
                         icon: Icon(Icons.download, color: Colors.white),
-                        label: Text("Download"),
+                        label: Text("Abrir no Navegador"),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.mainGreen,
                           foregroundColor: Colors.white,
