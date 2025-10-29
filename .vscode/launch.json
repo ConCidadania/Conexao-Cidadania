@@ -8,6 +8,7 @@
             "name": "con_cidadania",
             "request": "launch",
             "type": "dart",
+            "program": "lib/app/main.dart",
             // TEMP
             "args": [
                 "--web-browser-flag=--disable-web-security"
