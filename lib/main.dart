@@ -20,12 +20,15 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:con_cidadania/firebase_options.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 final g = GetIt.instance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting();
 
   g.registerSingleton<UserController>(UserController());
   g.registerSingleton<LawsuitController>(LawsuitController());

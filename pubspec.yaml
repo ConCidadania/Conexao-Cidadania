@@ -24,6 +24,8 @@ dependencies:
   path_provider: ^2.1.5
   url_launcher: ^6.3.2
   http: ^1.5.0
+  pdf: ^3.11.3        # Para a criação dos documentos PDF
+  printing: ^5.12.0   # Para a visualização do PDF no Web
 
 dev_dependencies:
   flutter_test:

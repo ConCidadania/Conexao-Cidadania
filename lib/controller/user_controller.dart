@@ -174,6 +174,24 @@ class UserController extends ChangeNotifier {
         .catchError((e) => showMessage(context, "Erro ao atualizar usuário"));
   }
 
+  Future<AppUser?> getOwnerData(String ownerId) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .where('uid', isEqualTo: ownerId)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        return AppUser.fromFirestore(querySnapshot.docs.first);
+      }
+      return null;
+    } catch (e) {
+      debugPrint("Erro ao buscar dados do dono da ação: $e");
+      return null;
+    }
+  }
+
   // Método para tratar erros de autenticação
   String _handleAuthError(dynamic e) {
     String message = 'Ocorreu um erro. Tente novamente.';

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:con_cidadania/controller/lawsuit_controller.dart';
 import 'package:con_cidadania/controller/user_controller.dart';
 import 'package:con_cidadania/model/lawsuit_model.dart';
+import 'package:con_cidadania/view/document_generation_view.dart';
 import 'package:con_cidadania/view/widgets/document_upload_card.dart';
 import 'package:con_cidadania/view/widgets/document_viewer_panel.dart';
 import 'package:con_cidadania/view/widgets/lawsuit_timeline_widget.dart';
@@ -939,8 +940,17 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                   leading: Icon(Icons.file_copy, color: AppColors.blueGreen),
                   title: Text("Emitir Procuração"),
                   onTap: () {
-                    Navigator.pop(context);
-                    _showComingSoonDialog("Emitir Procuração");
+                    //Navigator.pop(context);
+                    //_showComingSoonDialog("Emitir Procuração");
+                    Navigator.push(
+                      // Navega para a nova tela
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DocumentGenerationView(
+                          documentType: DocumentTemplateType.procuracao,
+                        ),
+                      ),
+                    );
                   },
                 ),
                 ListTile(
@@ -948,8 +958,17 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                       Icon(Icons.edit_document, color: AppColors.blueGreen),
                   title: Text("Preencher Petição"),
                   onTap: () {
-                    Navigator.pop(context);
-                    _showComingSoonDialog("Preencher Petição");
+                    //Navigator.pop(context);
+                    //_showComingSoonDialog("Preencher Petição");
+                    Navigator.push(
+                      // Navega para a nova tela
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DocumentGenerationView(
+                          documentType: DocumentTemplateType.peticao,
+                        ),
+                      ),
+                    );
                   },
                 ),
               ],
