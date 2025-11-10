@@ -138,14 +138,16 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
           } else {
             DocumentSnapshot currLawsuit = snapshot.data as DocumentSnapshot;
             // O corpo agora usa um LayoutBuilder para decidir qual layout mostrar
-            return LayoutBuilder(builder: (context, constraints) {
-              // Ponto de quebra: se a tela for maior que 900px, usa o layout desktop
-              if (constraints.maxWidth > 900) {
-                return _buildDesktopLayout(currLawsuit);
-              } else {
-                return _buildMobileLayout(currLawsuit);
-              }
-            });
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                // Ponto de quebra: se a tela for maior que 900px, usa o layout desktop
+                if (constraints.maxWidth > 900) {
+                  return _buildDesktopLayout(currLawsuit);
+                } else {
+                  return _buildMobileLayout(currLawsuit);
+                }
+              },
+            );
           }
         },
       ),
@@ -167,9 +169,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
       );
     } else {
       // Caso contrário, mostra o layout normal
-      return SingleChildScrollView(
-        child: _buildLawsuitDetails(currLawsuit),
-      );
+      return SingleChildScrollView(child: _buildLawsuitDetails(currLawsuit));
     }
   }
 
@@ -197,7 +197,8 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
             child: _isViewingDocument
                 ? DocumentViewerPanel(
                     key: ValueKey(
-                        _viewingDocumentPath), // Chave para reconstruir
+                      _viewingDocumentPath,
+                    ), // Chave para reconstruir
                     storagePath: _viewingDocumentPath!,
                     documentTitle: _viewingDocumentTitle!,
                     uploadedFileUrl: _viewingDocumentUrl,
@@ -216,6 +217,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
   // Conteúdo do painel esquerdo para o layout desktop
   Widget _buildLeftPanelContent(DocumentSnapshot currLawsuit) {
     String createdAt = currLawsuit['createdAt'] ?? '';
+    String ownerId = currLawsuit['ownerId'] ?? '';
     String ownerFirstName = currLawsuit['ownerFirstName'] ?? '';
     String ownerLastName = currLawsuit['ownerLastName'] ?? '';
     String ownerName = '$ownerFirstName $ownerLastName';
@@ -224,6 +226,8 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
         currLawsuit['ownerPhoneNumber'] ?? 'Telefone não disponínel';
     String type = currLawsuit['type'] ?? '';
     String status = currLawsuit['status'] ?? 'Status Indisponível';
+    bool procuracaoAssinada = currLawsuit['procuracaoAssinada'] ?? false;
+    bool peticaoEmitida = currLawsuit['peticaoEmitida'] ?? false;
 
     return Column(
       children: [
@@ -234,7 +238,10 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
           color: AppColors.yellowColor,
           children: [
             _buildInfoRow(
-                "Data de Abertura", _formatDate(createdAt), Icons.event),
+              "Data de Abertura",
+              _formatDate(createdAt),
+              Icons.event,
+            ),
             SizedBox(height: 10),
             _buildInfoRow("Aberto por", ownerName, Icons.account_circle),
             SizedBox(height: 10),
@@ -250,24 +257,33 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
           icon: Icons.attach_file_rounded,
           color: AppColors.darkGreen,
           children: [
+            // Botão para assinatura da procuração
+            _buildSignProcuracaoButton(procuracaoAssinada, ownerId),
+            // Cards para visualização da procuração e petição
+            _buildCardPeticao(peticaoEmitida, status),
+            _buildCardProcuracao(procuracaoAssinada, status),
+
             DocumentUploadCard(
               documentName: DocumentType.documento_identidade.name,
               documentTitle: 'Documento de Identidade (RG, CNH, Certidão)',
               lawsuitStatus: status,
+              showActions: true,
               onPreviewRequested: _openDocumentViewer,
             ),
             DocumentUploadCard(
               documentName: DocumentType.comprovante_endereco.name,
               documentTitle: 'Comprovante de Endereço',
               lawsuitStatus: status,
+              showActions: true,
               onPreviewRequested: _openDocumentViewer,
             ),
-            DocumentUploadCard(
+            /*DocumentUploadCard(
               documentName: DocumentType.procuracao_assinada.name,
               documentTitle: 'Procuração (Preenchida e Assinada)',
               lawsuitStatus: status,
+              showActions: true,
               onPreviewRequested: _openDocumentViewer,
-            ),
+            ),*/
             _buildUniqueDocUploadCards(type, status),
           ],
         ),
@@ -311,14 +327,19 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
             else
               Row(
                 children: [
-                  Icon(Icons.info_outline,
-                      color: AppColors.mediumGrey, size: 18),
+                  Icon(
+                    Icons.info_outline,
+                    color: AppColors.mediumGrey,
+                    size: 18,
+                  ),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       "O número do processo judicial ainda não foi atribuído a esta ação.",
-                      style:
-                          TextStyle(fontSize: 14, color: AppColors.mediumGrey),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppColors.mediumGrey,
+                      ),
                     ),
                   ),
                 ],
@@ -334,6 +355,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     String name = currLawsuit['name'] ?? 'Nome não disponível';
     String createdAt = currLawsuit['createdAt'] ?? '';
     String type = currLawsuit['type'] ?? '';
+    String ownerId = currLawsuit['ownerId'] ?? '';
     String ownerFirstName = currLawsuit['ownerFirstName'] ?? '';
     String ownerLastName = currLawsuit['ownerLastName'] ?? '';
     String ownerName = '$ownerFirstName $ownerLastName';
@@ -342,6 +364,8 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
         currLawsuit['ownerPhoneNumber'] ?? 'Telefone não disponínel';
     String judicialProcessNumber = currLawsuit['judicialProcessNumber'] ?? '';
     String status = currLawsuit['status'] ?? 'Status Indisponível';
+    bool procuracaoAssinada = currLawsuit['procuracaoAssinada'] ?? false;
+    bool peticaoEmitida = currLawsuit['peticaoEmitida'] ?? false;
 
     return Column(
       children: [
@@ -360,7 +384,10 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                 color: AppColors.yellowColor,
                 children: [
                   _buildInfoRow(
-                      "Data de Abertura", _formatDate(createdAt), Icons.event),
+                    "Data de Abertura",
+                    _formatDate(createdAt),
+                    Icons.event,
+                  ),
                   SizedBox(height: 10),
                   _buildInfoRow("Aberto por", ownerName, Icons.account_circle),
                   SizedBox(height: 10),
@@ -375,25 +402,34 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                 icon: Icons.attach_file_rounded,
                 color: AppColors.darkGreen,
                 children: [
+                  // Botão para assinatura da procuração
+                  _buildSignProcuracaoButton(procuracaoAssinada, ownerId),
+                  // Cards para visualização da procuração e petição
+                  _buildCardPeticao(peticaoEmitida, status),
+                  _buildCardProcuracao(procuracaoAssinada, status),
+
                   DocumentUploadCard(
                     documentName: DocumentType.documento_identidade.name,
                     documentTitle:
                         'Documento de Identidade (RG, CNH, Certidão)',
                     lawsuitStatus: status,
+                    showActions: true,
                     onPreviewRequested: _openDocumentViewer,
                   ),
                   DocumentUploadCard(
                     documentName: DocumentType.comprovante_endereco.name,
                     documentTitle: 'Comprovante de Endereço',
                     lawsuitStatus: status,
+                    showActions: true,
                     onPreviewRequested: _openDocumentViewer,
                   ),
-                  DocumentUploadCard(
+                  /*DocumentUploadCard(
                     documentName: DocumentType.procuracao_assinada.name,
                     documentTitle: 'Procuração (Preenchida e Assinada)',
                     lawsuitStatus: status,
+                    showActions: true,
                     onPreviewRequested: _openDocumentViewer,
-                  ),
+                  ),*/
                   _buildUniqueDocUploadCards(type, status),
                 ],
               ),
@@ -417,14 +453,19 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                   else
                     Row(
                       children: [
-                        Icon(Icons.info_outline,
-                            color: AppColors.mediumGrey, size: 18),
+                        Icon(
+                          Icons.info_outline,
+                          color: AppColors.mediumGrey,
+                          size: 18,
+                        ),
                         SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             "O número do processo judicial ainda não foi atribuído a esta ação.",
                             style: TextStyle(
-                                fontSize: 14, color: AppColors.mediumGrey),
+                              fontSize: 14,
+                              color: AppColors.mediumGrey,
+                            ),
                           ),
                         ),
                       ],
@@ -441,14 +482,63 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     );
   }
 
+  Widget _buildSignProcuracaoButton(bool procuracaoAssinada, String ownerId) {
+    final String storePath =
+        'files/users/$ownerId/lawsuits/${ctrl.currentLawsuitId}/docs/${DocumentType.procuracao_assinada.name}';
+    return FutureBuilder(
+      future: ctrl.getDocumentDownloadURL(storePath),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (!procuracaoAssinada) {
+          final String? downloadUrl = snapshot.data;
+          if (downloadUrl != null) {
+            return ListTile(
+              leading: Icon(Icons.edit_document),
+              title: Text("Assinar Procuração"),
+              onTap: () {},
+            );
+          }
+        } else {
+          return SizedBox.shrink();
+        }
+        return SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _buildCardProcuracao(bool procuracaoAssinada, String status) {
+    if (procuracaoAssinada) {
+      return DocumentUploadCard(
+        documentName: DocumentType.procuracao_assinada.name,
+        documentTitle: 'Procuração Assinada',
+        lawsuitStatus: status,
+        showActions: false,
+        onPreviewRequested: _openDocumentViewer,
+      );
+    } else {
+      return SizedBox.shrink();
+    }
+  }
+
+  Widget _buildCardPeticao(bool peticaoEmitida, String status) {
+    if (peticaoEmitida) {
+      return DocumentUploadCard(
+        documentName: DocumentType.peticao_inicial.name,
+        documentTitle: 'Petição Inicial',
+        lawsuitStatus: status,
+        showActions: false,
+        onPreviewRequested: _openDocumentViewer,
+      );
+    } else {
+      return SizedBox.shrink();
+    }
+  }
+
   // O Header Card foi extraído para um método próprio para ser reutilizado
   Widget _buildHeaderCard(String name, String type) {
     return Card(
       elevation: 8,
       shadowColor: Colors.black.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       // Header Card
       child: Container(
         width: double.infinity,
@@ -458,10 +548,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.mainGreen,
-              AppColors.darkGreen,
-            ],
+            colors: [AppColors.mainGreen, AppColors.darkGreen],
           ),
         ),
         padding: EdgeInsets.all(24),
@@ -475,11 +562,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                 color: Colors.white.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Icon(
-                _getLawsuitIcon(type),
-                size: 40,
-                color: Colors.white,
-              ),
+              child: Icon(_getLawsuitIcon(type), size: 40, color: Colors.white),
             ),
             SizedBox(height: 16),
             // Title
@@ -522,17 +605,11 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
-            color: AppColors.mainGreen,
-            strokeWidth: 3,
-          ),
+          CircularProgressIndicator(color: AppColors.mainGreen, strokeWidth: 3),
           SizedBox(height: 16),
           Text(
             "Carregando detalhes...",
-            style: TextStyle(
-              fontSize: 16,
-              color: AppColors.mediumGrey,
-            ),
+            style: TextStyle(fontSize: 16, color: AppColors.mediumGrey),
           ),
         ],
       ),
@@ -547,11 +624,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: AppColors.redColor,
-            ),
+            Icon(Icons.error_outline, size: 64, color: AppColors.redColor),
             SizedBox(height: 16),
             Text(
               "Erro ao carregar",
@@ -564,10 +637,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
             SizedBox(height: 8),
             Text(
               error,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.mediumGrey,
-              ),
+              style: TextStyle(fontSize: 14, color: AppColors.mediumGrey),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 24),
@@ -598,11 +668,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: AppColors.mediumGrey,
-            ),
+            Icon(Icons.search_off, size: 64, color: AppColors.mediumGrey),
             SizedBox(height: 16),
             Text(
               "Ação não encontrada",
@@ -615,10 +681,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
             SizedBox(height: 8),
             Text(
               "A ação judicial que você está procurando não foi encontrada",
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.mediumGrey,
-              ),
+              style: TextStyle(fontSize: 14, color: AppColors.mediumGrey),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 24),
@@ -630,10 +693,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: Text(
-                "Voltar",
-                style: TextStyle(color: Colors.white),
-              ),
+              child: Text("Voltar", style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -652,6 +712,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
               documentName: DocumentType.protocolo_inscricao_creche.name,
               documentTitle: 'Protocolo de Inscrição na Creche',
               lawsuitStatus: lawsuitStatus,
+              showActions: true,
               onPreviewRequested: _openDocumentViewer,
             ),
 
@@ -661,6 +722,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
               documentTitle:
                   'Documento Pessoal da Criança (Cetidão de Nascimento, RG)',
               lawsuitStatus: lawsuitStatus,
+              showActions: true,
               onPreviewRequested: _openDocumentViewer,
             ),
           ],
@@ -673,6 +735,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
               documentName: DocumentType.copia_prontuario_medico.name,
               documentTitle: 'Cópia do Prontuário Médico (Exames e Relatórios)',
               lawsuitStatus: lawsuitStatus,
+              showActions: true,
               onPreviewRequested: _openDocumentViewer,
             ),
 
@@ -681,6 +744,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
               documentName: DocumentType.copia_receituario_medico.name,
               documentTitle: 'Cópia do Receituário Médico (Prescrição Médica)',
               lawsuitStatus: lawsuitStatus,
+              showActions: true,
               onPreviewRequested: _openDocumentViewer,
             ),
 
@@ -691,6 +755,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
               documentTitle:
                   'Cópia do Expediente Administrativo da Secretaria da Saúde',
               lawsuitStatus: lawsuitStatus,
+              showActions: true,
               onPreviewRequested: _openDocumentViewer,
             ),
 
@@ -699,6 +764,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
               documentName: DocumentType.tres_ultimos_holerites.name,
               documentTitle: 'Três Últimos Holerites',
               lawsuitStatus: lawsuitStatus,
+              showActions: true,
               onPreviewRequested: _openDocumentViewer,
             ),
           ],
@@ -719,9 +785,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     return Card(
       elevation: 4,
       shadowColor: Colors.black.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: EdgeInsets.all(20),
         child: Column(
@@ -735,11 +799,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                     color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    icon,
-                    color: color,
-                    size: 20,
-                  ),
+                  child: Icon(icon, color: color, size: 20),
                 ),
                 SizedBox(width: 12),
                 Text(
@@ -764,11 +824,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     // ... (código original sem alterações)
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: AppColors.mediumGrey,
-        ),
+        Icon(icon, size: 16, color: AppColors.mediumGrey),
         SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -803,9 +859,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
     return Card(
       elevation: 4,
       shadowColor: Colors.black.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: EdgeInsets.all(20),
         child: Column(
@@ -846,11 +900,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                     onPressed: () {
                       _showComingSoonDialog("Editar Ação");
                     },
-                    icon: Icon(
-                      Icons.edit,
-                      size: 18,
-                      color: Colors.white,
-                    ),
+                    icon: Icon(Icons.edit, size: 18, color: Colors.white),
                     label: Text("Editar"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.mainGreen,
@@ -954,8 +1004,10 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
                   },
                 ),
                 ListTile(
-                  leading:
-                      Icon(Icons.edit_document, color: AppColors.blueGreen),
+                  leading: Icon(
+                    Icons.edit_document,
+                    color: AppColors.blueGreen,
+                  ),
                   title: Text("Preencher Petição"),
                   onTap: () {
                     //Navigator.pop(context);
@@ -1102,10 +1154,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
           ),
           content: Text(
             "A funcionalidade '$feature' estará disponível em breve!",
-            style: TextStyle(
-              fontSize: 16,
-              color: AppColors.mediumGrey,
-            ),
+            style: TextStyle(fontSize: 16, color: AppColors.mediumGrey),
           ),
           actions: [
             TextButton(
@@ -1143,10 +1192,7 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
           ),
           content: Text(
             "Tem certeza que deseja encerrar esta ação judicial? Esta ação não pode ser desfeita.",
-            style: TextStyle(
-              fontSize: 16,
-              color: AppColors.mediumGrey,
-            ),
+            style: TextStyle(fontSize: 16, color: AppColors.mediumGrey),
           ),
           actions: [
             TextButton(

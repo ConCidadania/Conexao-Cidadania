@@ -11,6 +11,7 @@ class DocumentUploadCard extends StatefulWidget {
   final String documentName;
   final String documentTitle;
   final String lawsuitStatus;
+  final bool showActions;
   final Function({
     required String storagePath,
     required String documentTitle,
@@ -24,6 +25,7 @@ class DocumentUploadCard extends StatefulWidget {
     required this.documentTitle,
     required this.lawsuitStatus,
     required this.onPreviewRequested,
+    required this.showActions,
   });
 
   @override
@@ -149,6 +151,80 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
     }
   }
 
+  Widget _buildActionButtons() {
+    if (widget.showActions) {
+      return Column(
+        children: [
+          // Ações (Botões) - Seleção e Upload
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            spacing: 10.0,
+            runSpacing: 8.0,
+            children: [
+              TextButton.icon(
+                onPressed: widget.lawsuitStatus != 'Encerrada'
+                    ? _pickFile
+                    : null,
+                icon: Icon(
+                  Icons.folder_open,
+                  size: 18,
+                  color: AppColors.mainGreen,
+                ),
+                label: Text(
+                  _selectedFileBytes != null
+                      ? "Trocar Arquivo"
+                      : "Selecionar Arquivo",
+                ),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.mainGreen,
+                ),
+              ),
+
+              // Botão Upload
+              ElevatedButton.icon(
+                onPressed: _selectedFileBytes != null && !_isUploading
+                    ? _uploadFile
+                    : null,
+                icon: _isUploading
+                    ? SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Icon(Icons.cloud_upload, size: 18, color: Colors.white),
+                label: Text(_isUploading ? "Enviando..." : "Upload"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.mainGreen,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+
+          // Status de Upload
+          if (_uploadStatus != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                _uploadStatus!,
+                style: TextStyle(
+                  color: _uploadStatus!.contains("Concluído")
+                      ? AppColors.mainGreen
+                      : AppColors.redColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+        ],
+      );
+    } else {
+      return SizedBox.shrink();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Verifica se o card pode ser clicado para preview
@@ -218,74 +294,7 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
                   ),
                 ),
               ),
-
-              // Ações (Botões) - Seleção e Upload
-              Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                spacing: 10.0,
-                runSpacing: 8.0,
-                children: [
-                  TextButton.icon(
-                    onPressed: widget.lawsuitStatus != 'Encerrada'
-                        ? _pickFile
-                        : null,
-                    icon: Icon(
-                      Icons.folder_open,
-                      size: 18,
-                      color: AppColors.mainGreen,
-                    ),
-                    label: Text(
-                      _selectedFileBytes != null
-                          ? "Trocar Arquivo"
-                          : "Selecionar Arquivo",
-                    ),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.mainGreen,
-                    ),
-                  ),
-
-                  // Botão Upload
-                  ElevatedButton.icon(
-                    onPressed: _selectedFileBytes != null && !_isUploading
-                        ? _uploadFile
-                        : null,
-                    icon: _isUploading
-                        ? SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Icon(
-                            Icons.cloud_upload,
-                            size: 18,
-                            color: Colors.white,
-                          ),
-                    label: Text(_isUploading ? "Enviando..." : "Upload"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.mainGreen,
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-
-              // Status de Upload
-              if (_uploadStatus != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    _uploadStatus!,
-                    style: TextStyle(
-                      color: _uploadStatus!.contains("Concluído")
-                          ? AppColors.mainGreen
-                          : AppColors.redColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+              _buildActionButtons(),
             ],
           ),
         ),

@@ -8,7 +8,7 @@ enum LawsuitType {
   VAGA_CRECHE_PUBLICA,
   CIRURGIA_EMERGENCIAL,
   ALTERACAO_NOME_SOCIAL,
-  INTERNACAO_ILP
+  INTERNACAO_ILP,
 }
 
 enum DocumentType {
@@ -38,36 +38,44 @@ class Lawsuit {
   String ownerEmail;
   String judicialProcessNumber;
   String status;
+  bool procuracaoAssinada = false;
+  bool peticaoEmitida = false;
 
   String createdAt;
 
-  Lawsuit(
-      {this.uid,
-      required this.name,
-      required this.type,
-      required this.ownerId,
-      required this.ownerFirstName,
-      required this.ownerLastName,
-      required this.ownerPhoneNumber,
-      required this.ownerEmail,
-      required this.createdAt,
-      required this.judicialProcessNumber,
-      required this.status});
+  Lawsuit({
+    this.uid,
+    required this.name,
+    required this.type,
+    required this.ownerId,
+    required this.ownerFirstName,
+    required this.ownerLastName,
+    required this.ownerPhoneNumber,
+    required this.ownerEmail,
+    required this.createdAt,
+    required this.judicialProcessNumber,
+    required this.status,
+    procuracaoAssinada,
+    peticaoEmitida,
+  });
 
   factory Lawsuit.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return Lawsuit(
-        uid: doc.id,
-        name: data['name'] ?? '',
-        type: data['type'] ?? '',
-        ownerId: data['ownerId'] ?? '',
-        ownerFirstName: data['ownerFirstName'] ?? '',
-        ownerLastName: data['ownerLastName'] ?? '',
-        ownerPhoneNumber: data['ownerPhoneNumber'] ?? '',
-        ownerEmail: data['ownerEmail'] ?? '',
-        judicialProcessNumber: data['judicialProcessNumber'] ?? '',
-        status: data['status'] ?? '',
-        createdAt: data['createdAt'] ?? formatDate(DateTime.now()));
+      uid: doc.id,
+      name: data['name'] ?? '',
+      type: data['type'] ?? '',
+      ownerId: data['ownerId'] ?? '',
+      ownerFirstName: data['ownerFirstName'] ?? '',
+      ownerLastName: data['ownerLastName'] ?? '',
+      ownerPhoneNumber: data['ownerPhoneNumber'] ?? '',
+      ownerEmail: data['ownerEmail'] ?? '',
+      judicialProcessNumber: data['judicialProcessNumber'] ?? '',
+      status: data['status'] ?? '',
+      procuracaoAssinada: data['procuracaoAssinada'] ?? false,
+      peticaoEmitida: data['peticaoEmitida'] ?? false,
+      createdAt: data['createdAt'] ?? formatDate(DateTime.now()),
+    );
   }
 
   Map<String, dynamic> toFirestore() {
@@ -81,6 +89,8 @@ class Lawsuit {
       'ownerEmail': ownerEmail,
       'judicialProcessNumber': judicialProcessNumber,
       'status': status,
+      'procuracaoAssinada': procuracaoAssinada,
+      'peticaoEmitida': peticaoEmitida,
       'createdAt': createdAt,
     };
   }

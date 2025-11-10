@@ -21,16 +21,23 @@ class LawsuitController extends ChangeNotifier {
   }
 
   void addLawsuit(context, Lawsuit lawsuit) {
-    _firestore.collection('lawsuits').add(lawsuit.toFirestore()).then((result) {
-      result.set({'uid': result.id}, SetOptions(merge: true));
-      showMessage(context, 'Ação adicionada com suceso');
-    }).catchError((error) {
-      showMessage(context, 'Erro ao adicionar ação');
-    });
+    _firestore
+        .collection('lawsuits')
+        .add(lawsuit.toFirestore())
+        .then((result) {
+          result.set({'uid': result.id}, SetOptions(merge: true));
+          showMessage(context, 'Ação adicionada com suceso');
+        })
+        .catchError((error) {
+          showMessage(context, 'Erro ao adicionar ação');
+        });
   }
 
   Future<String?> uploadDocument(
-      String documentName, String fileName, Uint8List fileData) async {
+    String documentName,
+    String fileName,
+    Uint8List fileData,
+  ) async {
     final userType = userCtrl.getCurrentUserType();
     final userId = userCtrl.getCurrentUserId();
 
@@ -52,12 +59,14 @@ class LawsuitController extends ChangeNotifier {
       final String downloadUrl = await snapshot.ref.getDownloadURL();
 
       debugPrint(
-          "Upload de documento '$documentName' realizado com sucesso. URL: $downloadUrl");
+        "Upload de documento '$documentName' realizado com sucesso. URL: $downloadUrl",
+      );
 
       return downloadUrl;
     } on FirebaseException catch (e) {
       debugPrint(
-          "Erro no Firebase Storage ao fazer upload de $documentName: ${e.message}");
+        "Erro no Firebase Storage ao fazer upload de $documentName: ${e.message}",
+      );
       return null;
     } catch (e) {
       debugPrint("Erro desconhecido ao fazer upload de $documentName: $e");
@@ -79,12 +88,14 @@ class LawsuitController extends ChangeNotifier {
       final String downloadUrl = await ref.getDownloadURL();
 
       debugPrint(
-          "Download URL obtida com sucesso para o caminho: $storagePath");
+        "Download URL obtida com sucesso para o caminho: $storagePath",
+      );
 
       return downloadUrl;
     } on FirebaseException catch (e) {
       debugPrint(
-          "Erro no Firebase Storage ao obter URL de $storagePath: ${e.message}");
+        "Erro no Firebase Storage ao obter URL de $storagePath: ${e.message}",
+      );
       return null;
     } catch (e) {
       debugPrint("Erro desconhecido ao obter URL de $storagePath: $e");
@@ -110,40 +121,55 @@ class LawsuitController extends ChangeNotifier {
   Future<DocumentSnapshot<Object?>> getCurrentLawsuit() async {
     CollectionReference lawsuits = _firestore.collection('lawsuits');
 
-    Future<DocumentSnapshot<Object?>> result =
-        lawsuits.doc(_currentLawsuitId).get();
+    Future<DocumentSnapshot<Object?>> result = lawsuits
+        .doc(_currentLawsuitId)
+        .get();
 
     return result;
   }
 
   Future<String> getCurrentLawsuitOwnerId() async {
-    DocumentSnapshot snapshot =
-        await _firestore.collection('lawsuits').doc(_currentLawsuitId).get();
+    DocumentSnapshot snapshot = await _firestore
+        .collection('lawsuits')
+        .doc(_currentLawsuitId)
+        .get();
 
     String ownerId = snapshot.get('ownerId') as String;
     return ownerId;
   }
 
   void updateLawsuitStatus(String newStatus) {
-    _firestore
-        .collection('lawsuits')
-        .doc(_currentLawsuitId)
-        .update({'status': newStatus});
+    _firestore.collection('lawsuits').doc(_currentLawsuitId).update({
+      'status': newStatus,
+    });
   }
 
   Future<String> getCurrentLawsuitStatus() async {
-    DocumentSnapshot snapshot =
-        await _firestore.collection('lawsuits').doc(_currentLawsuitId).get();
+    DocumentSnapshot snapshot = await _firestore
+        .collection('lawsuits')
+        .doc(_currentLawsuitId)
+        .get();
 
     String status = snapshot.get('status') as String;
     return status;
   }
 
   void updateLawsuitJudicialProcessNumber(String numeroProcesso) {
-    _firestore
-        .collection('lawsuits')
-        .doc(_currentLawsuitId)
-        .update({'judicialProcessNumber': numeroProcesso});
+    _firestore.collection('lawsuits').doc(_currentLawsuitId).update({
+      'judicialProcessNumber': numeroProcesso,
+    });
+  }
+
+  void updateLawsuitProcuracaoAssinada(bool procuracaoAssinada) {
+    _firestore.collection('lawsuits').doc(_currentLawsuitId).update({
+      'procuracaoAssinada': procuracaoAssinada,
+    });
+  }
+
+  void updateLawsuitPeticaoEmitida(bool peticaoEmitida) {
+    _firestore.collection('lawsuits').doc(_currentLawsuitId).update({
+      'peticaoEmitida': peticaoEmitida,
+    });
   }
 }
 

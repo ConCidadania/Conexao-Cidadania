@@ -178,6 +178,10 @@ class _DocumentGenerationViewState extends State<DocumentGenerationView> {
                             pdfData,
                           ) !=
                           null) {
+                        if (widget.documentType ==
+                            DocumentTemplateType.peticao) {
+                          _lawsuitCtrl.updateLawsuitPeticaoEmitida(true);
+                        }
                         showMessage(context, "Documento salvo com sucesso!");
                       } else {
                         showMessage(
