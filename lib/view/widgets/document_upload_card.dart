@@ -15,7 +15,8 @@ class DocumentUploadCard extends StatefulWidget {
     required String storagePath,
     required String documentTitle,
     String? uploadedFileUrl,
-  }) onPreviewRequested; // Adicione este callback
+  })
+  onPreviewRequested; // Adicione este callback
 
   const DocumentUploadCard({
     super.key,
@@ -49,9 +50,10 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
   void _onPreviewRequested() {
     print("Requested Preview for: ${widget.documentTitle}");
     widget.onPreviewRequested(
-        storagePath: widget.documentName,
-        documentTitle: widget.documentTitle,
-        uploadedFileUrl: _uploadedFileUrl);
+      storagePath: widget.documentName,
+      documentTitle: widget.documentTitle,
+      uploadedFileUrl: _uploadedFileUrl,
+    );
   }
 
   Future<void> _pickFile() async {
@@ -79,10 +81,14 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
     });
 
     // Recupera a url de download se existir
+    // TODO: Comment out the USER / LAWYER check and use just "getCurrentLawsuitId"
+    //final String storePath =
+    //    'files/users/${userCtrl.getCurrentUserType() == 'USER' ? userCtrl.getCurrentUserId() : await lawsuitCtrl.getCurrentLawsuitOwnerId()}/lawsuits/${lawsuitCtrl.currentLawsuitId}/docs/${widget.documentName}';
     final String storePath =
-        'files/users/${userCtrl.getCurrentUserType() == 'USER' ? userCtrl.getCurrentUserId() : await lawsuitCtrl.getCurrentLawsuitOwnerId()}/lawsuits/${lawsuitCtrl.currentLawsuitId}/docs/${widget.documentName}';
-    final String? downloadUrl =
-        await lawsuitCtrl.getDocumentDownloadURL(storePath);
+        'files/users/${await lawsuitCtrl.getCurrentLawsuitOwnerId()}/lawsuits/${lawsuitCtrl.currentLawsuitId}/docs/${widget.documentName}';
+    final String? downloadUrl = await lawsuitCtrl.getDocumentDownloadURL(
+      storePath,
+    );
 
     setState(() {
       _isUploading = false;
@@ -168,10 +174,12 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
                   // Ícone de status de arquivo
                   Icon(
                     _uploadedFileUrl != null
-                        ? Icons.check_circle // Arquivo anexado
+                        ? Icons
+                              .check_circle // Arquivo anexado
                         : _selectedFileBytes != null
-                            ? Icons.insert_drive_file // Arquivo selecionado
-                            : Icons.upload_file, // Padrão
+                        ? Icons
+                              .insert_drive_file // Arquivo selecionado
+                        : Icons.upload_file, // Padrão
                     size: 24,
                     color: _uploadedFileUrl != null
                         ? AppColors.darkGreen
@@ -204,8 +212,9 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
                   _selectedFileName ?? "Nenhum arquivo selecionado.",
                   style: TextStyle(
                     color: AppColors.mediumGrey,
-                    fontStyle:
-                        _selectedFileName == null ? FontStyle.italic : null,
+                    fontStyle: _selectedFileName == null
+                        ? FontStyle.italic
+                        : null,
                   ),
                 ),
               ),
@@ -217,13 +226,19 @@ class _DocumentUploadCardState extends State<DocumentUploadCard> {
                 runSpacing: 8.0,
                 children: [
                   TextButton.icon(
-                    onPressed:
-                        widget.lawsuitStatus != 'Encerrada' ? _pickFile : null,
-                    icon: Icon(Icons.folder_open,
-                        size: 18, color: AppColors.mainGreen),
-                    label: Text(_selectedFileBytes != null
-                        ? "Trocar Arquivo"
-                        : "Selecionar Arquivo"),
+                    onPressed: widget.lawsuitStatus != 'Encerrada'
+                        ? _pickFile
+                        : null,
+                    icon: Icon(
+                      Icons.folder_open,
+                      size: 18,
+                      color: AppColors.mainGreen,
+                    ),
+                    label: Text(
+                      _selectedFileBytes != null
+                          ? "Trocar Arquivo"
+                          : "Selecionar Arquivo",
+                    ),
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.mainGreen,
                     ),

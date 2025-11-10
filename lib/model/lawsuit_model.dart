@@ -16,6 +16,7 @@ enum DocumentType {
   documento_identidade,
   comprovante_endereco,
   procuracao_assinada,
+  peticao_inicial,
   // Vaga em creche pública
   protocolo_inscricao_creche,
   documento_identidade_crianca,

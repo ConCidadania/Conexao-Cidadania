@@ -6,6 +6,7 @@ import 'package:con_cidadania/model/lawsuit_model.dart';
 //import 'package:con_cidadania/model/user_model.dart';
 import 'package:con_cidadania/services/pdf_generator_service.dart';
 import 'package:con_cidadania/utils/colors.dart';
+import 'package:con_cidadania/utils/message.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:printing/printing.dart'; // Importa o visualizador de PDF
@@ -17,7 +18,7 @@ class DocumentGenerationView extends StatefulWidget {
   final DocumentTemplateType documentType;
 
   const DocumentGenerationView({Key? key, required this.documentType})
-      : super(key: key);
+    : super(key: key);
 
   @override
   _DocumentGenerationViewState createState() => _DocumentGenerationViewState();
@@ -97,9 +98,10 @@ class _DocumentGenerationViewState extends State<DocumentGenerationView> {
                 children: [
                   CircularProgressIndicator(color: AppColors.mainGreen),
                   SizedBox(height: 20),
-                  Text("Gerando documento, por favor aguarde...",
-                      style:
-                          TextStyle(fontSize: 16, color: AppColors.mediumGrey)),
+                  Text(
+                    "Gerando documento, por favor aguarde...",
+                    style: TextStyle(fontSize: 16, color: AppColors.mediumGrey),
+                  ),
                 ],
               );
             }
@@ -109,15 +111,20 @@ class _DocumentGenerationViewState extends State<DocumentGenerationView> {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline,
-                      color: AppColors.redColor, size: 60),
+                  Icon(
+                    Icons.error_outline,
+                    color: AppColors.redColor,
+                    size: 60,
+                  ),
                   SizedBox(height: 20),
-                  Text("Erro ao Gerar Documento",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text(snapshot.error.toString(),
-                      style:
-                          TextStyle(fontSize: 14, color: AppColors.mediumGrey)),
+                  Text(
+                    "Erro ao Gerar Documento",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    snapshot.error.toString(),
+                    style: TextStyle(fontSize: 14, color: AppColors.mediumGrey),
+                  ),
                 ],
               );
             }
@@ -128,7 +135,7 @@ class _DocumentGenerationViewState extends State<DocumentGenerationView> {
               children: [
                 // Botão de Download (O PdfPreview também tem o seu)
                 Container(
-                  padding: EdgeInsets.all(16),
+                  padding: EdgeInsets.all(12),
                   width: double.infinity,
                   color: Colors.white,
                   child: ElevatedButton.icon(
@@ -145,6 +152,39 @@ class _DocumentGenerationViewState extends State<DocumentGenerationView> {
                         bytes: pdfData,
                         filename: '${_getTitle().replaceAll(' ', '_')}.pdf',
                       );
+                    },
+                  ),
+                ),
+                // Botão de Upload
+                Container(
+                  padding: EdgeInsets.all(12),
+                  width: double.infinity,
+                  color: Colors.white,
+                  child: ElevatedButton.icon(
+                    icon: Icon(Icons.upload, color: Colors.white),
+                    label: Text("Upload do Documento"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.mainGreen,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    onPressed: () async {
+                      if (await _lawsuitCtrl.uploadDocument(
+                            widget.documentType ==
+                                    DocumentTemplateType.procuracao
+                                ? DocumentType.procuracao_assinada.name
+                                : DocumentType.peticao_inicial.name,
+                            '${_getTitle().replaceAll(' ', '_')}.pdf',
+                            pdfData,
+                          ) !=
+                          null) {
+                        showMessage(context, "Documento salvo com sucesso!");
+                      } else {
+                        showMessage(
+                          context,
+                          "Erro ao fazer upload do documento.",
+                        );
+                      }
                     },
                   ),
                 ),

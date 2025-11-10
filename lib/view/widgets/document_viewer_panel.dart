@@ -5,7 +5,7 @@ import 'package:con_cidadania/controller/lawsuit_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Importações específicas para Flutter Web
-import 'dart:ui' as ui;
+import 'dart:ui_web' as ui;
 import 'dart:html' as html;
 
 class DocumentViewerPanel extends StatefulWidget {
