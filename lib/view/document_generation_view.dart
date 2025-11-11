@@ -181,6 +181,8 @@ class _DocumentGenerationViewState extends State<DocumentGenerationView> {
                         if (widget.documentType ==
                             DocumentTemplateType.peticao) {
                           _lawsuitCtrl.updateLawsuitPeticaoEmitida(true);
+                        } else {
+                          _lawsuitCtrl.updateLawsuitProcuracaoAssinada(false);
                         }
                         showMessage(context, "Documento salvo com sucesso!");
                       } else {

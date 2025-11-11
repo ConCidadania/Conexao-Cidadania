@@ -3,9 +3,11 @@ import 'package:con_cidadania/controller/lawsuit_controller.dart';
 import 'package:con_cidadania/controller/user_controller.dart';
 import 'package:con_cidadania/model/lawsuit_model.dart';
 import 'package:con_cidadania/view/document_generation_view.dart';
+import 'package:con_cidadania/view/signature_view.dart';
 import 'package:con_cidadania/view/widgets/document_upload_card.dart';
 import 'package:con_cidadania/view/widgets/document_viewer_panel.dart';
 import 'package:con_cidadania/view/widgets/lawsuit_timeline_widget.dart';
+import 'package:con_cidadania/view/widgets/procuracao_signature_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
@@ -483,6 +485,8 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
   }
 
   Widget _buildSignProcuracaoButton(bool procuracaoAssinada, String ownerId) {
+    // Define o nome padrão e o caminho do storage
+    final String documentName = DocumentType.procuracao_assinada.name;
     final String storePath =
         'files/users/$ownerId/lawsuits/${ctrl.currentLawsuitId}/docs/${DocumentType.procuracao_assinada.name}';
     return FutureBuilder(
@@ -491,10 +495,26 @@ class _ManageLawsuitViewState extends State<ManageLawsuitView> {
         if (!procuracaoAssinada) {
           final String? downloadUrl = snapshot.data;
           if (downloadUrl != null) {
-            return ListTile(
-              leading: Icon(Icons.edit_document),
-              title: Text("Assinar Procuração"),
-              onTap: () {},
+            return ProcuracaoSignatureButton(
+              onTap: () {
+                // Navega para a nova tela de assinatura
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SignatureView(
+                      unsignedPdfUrl: downloadUrl,
+                      documentName: documentName,
+                      // O nome do arquivo como o usuário o verá
+                      fileName: "procuracao_${ctrl.currentLawsuitId}.pdf",
+                    ),
+                  ),
+                ).then((signatureSaved) {
+                  // Atualiza a view após retornar, caso a assinatura tenha sido salva
+                  if (signatureSaved == true) {
+                    setState(() {});
+                  }
+                });
+              },
             );
           }
         } else {

@@ -26,6 +26,9 @@ dependencies:
   http: ^1.5.0
   pdf: ^3.11.3        # Para a criação dos documentos PDF
   printing: ^5.12.0   # Para a visualização do PDF no Web
+  syncfusion_flutter_pdf: ^31.2.5
+  syncfusion_flutter_pdfviewer: ^31.2.5
+  syncfusion_flutter_signaturepad: ^31.2.5
 
 dev_dependencies:
   flutter_test:
