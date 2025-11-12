@@ -1,15 +1,24 @@
 // lib/view/views/signature_view.dart
 import 'dart:typed_data';
 import 'package:get_it/get_it.dart';
-import 'dart:ui' as ui;
+import 'dart:ui' as dart_ui; // Renomeado para evitar conflito
+import 'dart:ui_web' as ui;
+import 'dart:html' as html; // Importação necessária para o IFrame
+import 'dart:convert'; // Importação necessária para Base64
 import 'package:con_cidadania/controller/lawsuit_controller.dart';
 import 'package:con_cidadania/utils/colors.dart';
 import 'package:con_cidadania/utils/message.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart'; // Importação principal
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
+
+// Enum para controlar o que está sendo exibido na tela
+enum _SignatureViewStep {
+  previewingPdf, // Mostra o IFrame do PDF
+  showingOptions, // Mostra as opções de assinatura (Manual, Certificado)
+  signingManually, // Mostra o SignaturePad
+}
 
 class SignatureView extends StatefulWidget {
   final String unsignedPdfUrl;
@@ -34,19 +43,20 @@ class _SignatureViewState extends State<SignatureView> {
   Uint8List? _signatureData; // Armazena os bytes da assinatura
   bool _isLoading = false;
 
-  // NOVO: Futuro para armazenar os bytes do PDF
   late Future<Uint8List> _pdfBytesFuture;
-  // NOVO: Armazena os bytes após o carregamento para reutilização
   Uint8List? _loadedPdfBytes;
+
+  final String _viewId = 'pdf-iframe-${DateTime.now().millisecondsSinceEpoch}';
+
+  // Controla o estado da tela
+  _SignatureViewStep _currentStep = _SignatureViewStep.previewingPdf;
 
   @override
   void initState() {
     super.initState();
-    // NOVO: Inicia o download do PDF assim que a tela é carregada
     _pdfBytesFuture = _loadPdfBytes();
   }
 
-  // NOVO: Método para baixar os bytes do PDF
   Future<Uint8List> _loadPdfBytes() async {
     try {
       final http.Response response = await http.get(
@@ -83,92 +93,275 @@ class _SignatureViewState extends State<SignatureView> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            // Se estiver em um passo interno, "Voltar" leva ao passo anterior
+            if (_currentStep != _SignatureViewStep.previewingPdf) {
+              setState(() {
+                _currentStep = _SignatureViewStep.previewingPdf;
+              });
+            } else {
+              // Se já estiver no passo principal, sai da tela
+              Navigator.of(context).pop();
+            }
+          },
         ),
       ),
       body: Column(
         children: [
-          // 1. MODIFICADO: Visualizador de PDF agora usa FutureBuilder
-          Expanded(
-            child: Container(
-              margin: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: AppColors.mediumGrey.withOpacity(0.5),
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              // Usa FutureBuilder para esperar os bytes do PDF
-              child: FutureBuilder<Uint8List>(
-                future: _pdfBytesFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircularProgressIndicator(color: AppColors.mainGreen),
-                          SizedBox(height: 16),
-                          Text("Carregando documento..."),
-                        ],
-                      ),
-                    );
-                  }
+          // 1. O CONTEÚDO PRINCIPAL (EXPANDIDO)
+          // Alterna entre PDF, Opções ou SignaturePad
+          Expanded(child: _buildMainContent()),
 
-                  if (snapshot.hasError || !snapshot.hasData) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          "Erro ao carregar o PDF: ${snapshot.error}",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: AppColors.redColor),
-                        ),
-                      ),
-                    );
-                  }
+          // 2. PRÉ-VISUALIZAÇÃO DA ASSINATURA
+          // Só aparece no modo "preview" E se a assinatura já foi capturada
+          if (_currentStep == _SignatureViewStep.previewingPdf &&
+              _signatureData != null)
+            _buildSignaturePreview(),
 
-                  // SUCESSO: Usa SfPdfViewer.memory com os bytes carregados
-                  return SfPdfViewer.memory(
-                    snapshot.data!,
-                    canShowPasswordDialog: false,
-                    canShowScrollHead: false,
-                  );
-                },
-              ),
-            ),
-          ),
-
-          // 2. Pré-visualização da Assinatura (sem alteração)
-          if (_signatureData != null)
-            Container(
-              padding: EdgeInsets.all(12),
-              margin: EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.mainGreen),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    "Assinatura capturada:",
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  SizedBox(height: 8),
-                  Image.memory(_signatureData!, height: 70),
-                ],
-              ),
-            ),
-
-          // 3. Botões de Ação (sem alteração)
-          _buildBottomActionButtons(),
+          // 3. BOTÕES DE AÇÃO INFERIORES
+          // Só aparecem no modo "preview"
+          if (_currentStep == _SignatureViewStep.previewingPdf)
+            _buildBottomActionButtons(),
         ],
       ),
     );
   }
 
-  // Botões na parte inferior da tela (sem alteração)
+  // Novo método que roteia o conteúdo principal
+  Widget _buildMainContent() {
+    switch (_currentStep) {
+      case _SignatureViewStep.previewingPdf:
+        return _buildPdfViewer(); // O IFrame
+      case _SignatureViewStep.showingOptions:
+        return _buildSignatureOptions(); // As opções (antigo dialog)
+      case _SignatureViewStep.signingManually:
+        return _buildSignaturePad(); // O SignaturePad (antigo dialog)
+    }
+  }
+
+  // 1A. O visualizador de PDF (o antigo FutureBuilder)
+  Widget _buildPdfViewer() {
+    return Container(
+      margin: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.mediumGrey.withOpacity(0.5)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      // Usa FutureBuilder para esperar os bytes do PDF
+      child: FutureBuilder<Uint8List>(
+        future: _pdfBytesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(color: AppColors.mainGreen),
+                  SizedBox(height: 16),
+                  Text("Carregando documento..."),
+                ],
+              ),
+            );
+          }
+
+          if (snapshot.hasError || !snapshot.hasData) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  "Erro ao carregar o PDF: ${snapshot.error}",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColors.redColor),
+                ),
+              ),
+            );
+          }
+
+          // SUCESSO: Usa HtmlElementView (IFrame)
+          final pdfData = snapshot.data!;
+
+          // Converter bytes para data URL
+          final String base64Pdf = base64Encode(pdfData);
+          final String dataUrl = 'data:application/pdf;base64,$base64Pdf';
+
+          // Registrar a view factory para o IFrame
+          // ignore: undefined_prefixed_name
+          ui.platformViewRegistry.registerViewFactory(_viewId, (int viewId) {
+            final html.IFrameElement element = html.IFrameElement()
+              // Define o src para a Data URL (bytes em Base64)
+              ..src = dataUrl
+              ..style.border = 'none'
+              ..style.width = '100%'
+              ..style.height = '100%';
+            return element;
+          });
+
+          // Retorna o widget do IFrame
+          return HtmlElementView(viewType: _viewId);
+        },
+      ),
+    );
+  }
+
+  // 1B. O widget de opções de assinatura (antigo _showSignatureOptionsDialog)
+  Widget _buildSignatureOptions() {
+    return Container(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Escolha o método de assinatura",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.blackColor,
+            ),
+          ),
+          SizedBox(height: 16),
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ListTile(
+              leading: Icon(Icons.qr_code_scanner, color: AppColors.mainGreen),
+              title: Text("Assinar com Certificado Digital"),
+              subtitle: Text("Disponível em breve"),
+              onTap: () {
+                showMessage(
+                  context,
+                  "Esta funcionalidade estará disponível em breve.",
+                );
+              },
+            ),
+          ),
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ListTile(
+              leading: Icon(Icons.edit, color: AppColors.mainGreen),
+              title: Text("Assinar Manualmente na Tela"),
+              trailing: Icon(
+                Icons.arrow_forward_ios,
+                color: AppColors.mediumGrey,
+              ),
+              onTap: () {
+                setState(() {
+                  _currentStep = _SignatureViewStep.signingManually;
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 1C. O widget do SignaturePad (antigo _showSignaturePadDialog)
+  Widget _buildSignaturePad() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            "Assine no espaço abaixo",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.blackColor,
+            ),
+          ),
+          SizedBox(height: 16),
+          // O SignaturePad agora está em um Expanded para ocupar o espaço
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: AppColors.mediumGrey),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: SfSignaturePad(
+                key: _signaturePadKey,
+                backgroundColor: Colors.white,
+                minimumStrokeWidth: 400,
+              ),
+            ),
+          ),
+          SizedBox(height: 16),
+          // Botões de ação do SignaturePad
+          Row(
+            children: [
+              OutlinedButton.icon(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  setState(() {
+                    _currentStep = _SignatureViewStep.showingOptions;
+                  });
+                },
+                label: Text("Voltar"),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.mediumGrey,
+                  side: BorderSide(color: AppColors.mediumGrey),
+                ),
+              ),
+              SizedBox(width: 8),
+              OutlinedButton(
+                onPressed: () {
+                  _signaturePadKey.currentState?.clear();
+                },
+                child: Text(
+                  "Limpar",
+                  style: TextStyle(color: AppColors.redColor),
+                ),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _saveSignatureFromPad,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.mainGreen,
+                  ),
+                  child: Text(
+                    "Salvar Assinatura",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 2. Widget de pré-visualização da assinatura
+  Widget _buildSignaturePreview() {
+    return Container(
+      padding: EdgeInsets.all(12),
+      margin: EdgeInsets.fromLTRB(16, 0, 16, 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.mainGreen),
+      ),
+      child: Column(
+        children: [
+          Text(
+            "Assinatura capturada:",
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          SizedBox(height: 8),
+          Image.memory(_signatureData!, height: 70),
+        ],
+      ),
+    );
+  }
+
+  // 3. Botões de ação inferiores (modificado o onPressed)
   Widget _buildBottomActionButtons() {
     return Container(
       padding: EdgeInsets.all(24),
@@ -187,7 +380,12 @@ class _SignatureViewState extends State<SignatureView> {
           // Botão "Assinar Procuração"
           Expanded(
             child: OutlinedButton.icon(
-              onPressed: _showSignatureOptionsDialog,
+              onPressed: () {
+                // MODIFICADO: Em vez de chamar dialog, muda o estado
+                setState(() {
+                  _currentStep = _SignatureViewStep.showingOptions;
+                });
+              },
               icon: Icon(Icons.draw, color: AppColors.mainGreen),
               label: Text(
                 _signatureData == null ? "Assinar" : "Assinar Novamente",
@@ -207,7 +405,6 @@ class _SignatureViewState extends State<SignatureView> {
           Expanded(
             flex: 2,
             child: ElevatedButton.icon(
-              // Desabilitado se não houver assinatura, PDF ou se estiver carregando
               onPressed:
                   (_signatureData == null ||
                       _isLoading ||
@@ -242,115 +439,23 @@ class _SignatureViewState extends State<SignatureView> {
     );
   }
 
-  // Dialog com as opções de assinatura (sem alteração)
-  void _showSignatureOptionsDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Text("Escolha o método de assinatura"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(
-                  Icons.qr_code_scanner,
-                  color: AppColors.mainGreen,
-                ),
-                title: Text("Assinar com Certificado Digital"),
-                subtitle: Text("Disponível em breve"),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  showMessage(
-                    context,
-                    "Esta funcionalidade estará disponível em breve.",
-                  );
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.edit, color: AppColors.mainGreen),
-                title: Text("Assinar Manualmente na Tela"),
-                onTap: () {
-                  Navigator.of(context).pop(); // Fecha o dialog de opções
-                  _showSignaturePadDialog(); // Abre o signature pad
-                },
-              ),
-            ],
-          ),
-        );
-      },
+  // Função auxiliar para salvar a assinatura (antiga lógica do dialog)
+  void _saveSignatureFromPad() async {
+    final dart_ui.Image image = await _signaturePadKey.currentState!.toImage();
+    final ByteData? byteData = await image.toByteData(
+      format: dart_ui.ImageByteFormat.png,
     );
+    if (byteData != null) {
+      setState(() {
+        _signatureData = byteData.buffer.asUint8List();
+        // Retorna para a tela de preview
+        _currentStep = _SignatureViewStep.previewingPdf;
+      });
+    }
   }
 
-  // Dialog com o SignaturePad (sem alteração)
-  void _showSignaturePadDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Text("Assine no espaço abaixo"),
-          content: Container(
-            width: MediaQuery.of(context).size.width * 0.8, // 80% da largura
-            height: 200, // Altura fixa para o pad
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.mediumGrey),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: SfSignaturePad(
-              key: _signaturePadKey,
-              backgroundColor: Colors.white,
-              minimumStrokeWidth: 200,
-            ),
-          ),
-          actions: [
-            OutlinedButton(
-              onPressed: () {
-                _signaturePadKey.currentState?.clear();
-              },
-              child: Text(
-                "Limpar",
-                style: TextStyle(color: AppColors.redColor),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                // Converte a assinatura em imagem
-                final ui.Image image = await _signaturePadKey.currentState!
-                    .toImage();
-                final ByteData? byteData = await image.toByteData(
-                  format: ui.ImageByteFormat.png,
-                );
-                if (byteData != null) {
-                  setState(() {
-                    _signatureData = byteData.buffer.asUint8List();
-                  });
-                  Navigator.of(context).pop(); // Fecha o pad
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.mainGreen,
-              ),
-              child: Text(
-                "Salvar Assinatura",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Lógica principal: aplica a assinatura ao PDF e faz o upload
+  // Lógica principal: aplica a assinatura ao PDF e faz o upload (sem alteração)
   Future<void> _handleConfirmSignature() async {
-    // MODIFICADO: Verifica se os bytes da assinatura E do PDF estão prontos
     if (_signatureData == null || _loadedPdfBytes == null) return;
 
     setState(() {
@@ -360,20 +465,13 @@ class _SignatureViewState extends State<SignatureView> {
     showMessage(context, "Aplicando assinatura ao documento...");
 
     try {
-      // 1. MODIFICADO: Não precisa mais baixar. Usa os bytes já carregados
       final Uint8List originalPdfBytes = _loadedPdfBytes!;
-
-      // 2. Carregar o documento PDF
       final PdfDocument document = PdfDocument(inputBytes: originalPdfBytes);
-
-      // 3. Carregar a imagem da assinatura
       final PdfBitmap signatureImage = PdfBitmap(_signatureData!);
-
-      // 4. Obter a última página (onde a assinatura geralmente fica)
       final PdfPage page = document.pages[document.pages.count - 1];
       final Size pageSize = page.getClientSize();
 
-      // 5. Desenhar a assinatura na página
+      // Posição ajustada (correção da última etapa)
       final double y = pageSize.height - 400; // 400 pixels de baixo
       final double x = (pageSize.width - 200) / 2; // 200 de largura
       page.graphics.drawImage(
@@ -382,15 +480,13 @@ class _SignatureViewState extends State<SignatureView> {
           x,
           y,
           200,
-          40, // Aumenta a altura para a assinatura não ficar achatada
+          40, // Proporção ajustada
         ),
       );
 
-      // 6. Salvar o novo documento PDF
       final List<int> newPdfBytes = await document.save();
       document.dispose();
 
-      // 7. Fazer upload do novo PDF (sobrescrevendo o antigo)
       showMessage(context, "Salvando documento assinado...");
       await _lawsuitCtrl.uploadDocument(
         widget.documentName,
@@ -398,7 +494,6 @@ class _SignatureViewState extends State<SignatureView> {
         Uint8List.fromList(newPdfBytes),
       );
 
-      // 8. Atualizar o status da ação no Firestore
       _lawsuitCtrl.updateLawsuitProcuracaoAssinada(true);
 
       showMessage(context, "Procuração assinada e salva com sucesso!");

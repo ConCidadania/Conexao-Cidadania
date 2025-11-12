@@ -29,6 +29,7 @@ dependencies:
   syncfusion_flutter_pdf: ^31.2.5
   syncfusion_flutter_pdfviewer: ^31.2.5
   syncfusion_flutter_signaturepad: ^31.2.5
+  pointer_interceptor: ^0.10.1+2
 
 dev_dependencies:
   flutter_test:
