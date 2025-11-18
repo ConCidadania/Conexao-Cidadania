@@ -17,7 +17,6 @@ import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
 enum _SignatureViewStep {
   previewingPdf, // Mostra o IFrame do PDF
   showingOptions, // Mostra as opções de assinatura (Manual, Certificado)
-  signingManually, // Mostra o SignaturePad
 }
 
 class SignatureView extends StatefulWidget {
@@ -134,8 +133,6 @@ class _SignatureViewState extends State<SignatureView> {
         return _buildPdfViewer(); // O IFrame
       case _SignatureViewStep.showingOptions:
         return _buildSignatureOptions(); // As opções (antigo dialog)
-      case _SignatureViewStep.signingManually:
-        return _buildSignaturePad(); // O SignaturePad (antigo dialog)
     }
   }
 
@@ -249,9 +246,8 @@ class _SignatureViewState extends State<SignatureView> {
                 color: AppColors.mediumGrey,
               ),
               onTap: () {
-                setState(() {
-                  _currentStep = _SignatureViewStep.signingManually;
-                });
+                // Show dialog
+                _showSignaturePadDialog();
               },
             ),
           ),
@@ -260,81 +256,66 @@ class _SignatureViewState extends State<SignatureView> {
     );
   }
 
-  // 1C. O widget do SignaturePad (antigo _showSignaturePadDialog)
-  Widget _buildSignaturePad() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            "Assine no espaço abaixo",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.blackColor,
+  void _showSignaturePadDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text("Assine no espaço abaixo"),
+          content: Container(
+            width: MediaQuery.of(context).size.width * 0.8, // 80% da largura
+            height: 200, // Altura fixa para o pad
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.mediumGrey),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: SfSignaturePad(
+              key: _signaturePadKey,
+              backgroundColor: Colors.white,
+              minimumStrokeWidth: 200,
             ),
           ),
-          SizedBox(height: 16),
-          // O SignaturePad agora está em um Expanded para ocupar o espaço
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: AppColors.mediumGrey),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: SfSignaturePad(
-                key: _signaturePadKey,
-                backgroundColor: Colors.white,
-                minimumStrokeWidth: 400,
+          actions: [
+            OutlinedButton(
+              onPressed: () {
+                _signaturePadKey.currentState?.clear();
+              },
+              child: Text(
+                "Limpar",
+                style: TextStyle(color: AppColors.redColor),
               ),
             ),
-          ),
-          SizedBox(height: 16),
-          // Botões de ação do SignaturePad
-          Row(
-            children: [
-              OutlinedButton.icon(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () {
+            ElevatedButton(
+              onPressed: () async {
+                // Converte a assinatura em imagem
+                final dart_ui.Image image = await _signaturePadKey.currentState!
+                    .toImage();
+                final ByteData? byteData = await image.toByteData(
+                  format: dart_ui.ImageByteFormat.png,
+                );
+                if (byteData != null) {
                   setState(() {
-                    _currentStep = _SignatureViewStep.showingOptions;
+                    _signatureData = byteData.buffer.asUint8List();
+                    _currentStep = _SignatureViewStep.previewingPdf;
                   });
-                },
-                label: Text("Voltar"),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.mediumGrey,
-                  side: BorderSide(color: AppColors.mediumGrey),
-                ),
+                  Navigator.of(context).pop(); // Fecha o pad
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.mainGreen,
               ),
-              SizedBox(width: 8),
-              OutlinedButton(
-                onPressed: () {
-                  _signaturePadKey.currentState?.clear();
-                },
-                child: Text(
-                  "Limpar",
-                  style: TextStyle(color: AppColors.redColor),
-                ),
+              child: Text(
+                "Salvar Assinatura",
+                style: TextStyle(color: Colors.white),
               ),
-              SizedBox(width: 8),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: _saveSignatureFromPad,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.mainGreen,
-                  ),
-                  child: Text(
-                    "Salvar Assinatura",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -437,21 +418,6 @@ class _SignatureViewState extends State<SignatureView> {
         ],
       ),
     );
-  }
-
-  // Função auxiliar para salvar a assinatura (antiga lógica do dialog)
-  void _saveSignatureFromPad() async {
-    final dart_ui.Image image = await _signaturePadKey.currentState!.toImage();
-    final ByteData? byteData = await image.toByteData(
-      format: dart_ui.ImageByteFormat.png,
-    );
-    if (byteData != null) {
-      setState(() {
-        _signatureData = byteData.buffer.asUint8List();
-        // Retorna para a tela de preview
-        _currentStep = _SignatureViewStep.previewingPdf;
-      });
-    }
   }
 
   // Lógica principal: aplica a assinatura ao PDF e faz o upload (sem alteração)
